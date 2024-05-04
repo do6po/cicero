@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+
+  cicero-test-db:
+    image: postgres:14.1
+    environment:
+      POSTGRES_DB: cicero
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+    networks:
+      - yeenergy
+    ports:
+      - "25432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+
+networks:
+  yeenergy:
+    driver: bridge
