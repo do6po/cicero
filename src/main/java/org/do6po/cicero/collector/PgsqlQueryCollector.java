@@ -63,7 +63,7 @@ public class PgsqlQueryCollector implements QueryCollector {
       fillForLimit(builder, sqlStringBuilder);
     }
 
-    if (builder.getOffset() != null) {
+    if (builder.getOffset() > 0) {
       addSpace(sqlStringBuilder);
       fillForOffset(builder, sqlStringBuilder);
     }
