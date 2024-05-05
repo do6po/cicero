@@ -6,23 +6,26 @@ import static org.do6po.cicero.utils.DotUtil.dot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
+import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.expression.join.JoinExpression.JoinTypeEnum;
 import org.junit.jupiter.api.Test;
 
 class QueryBuilderTest {
 
-  String table1 = "table1";
-  String table2 = "table2";
-  String table3 = "table3";
+  public static final String table1 = "table1";
+  public static final String table2 = "table2";
+  public static final String table3 = "table3";
 
-  String column1 = "column1";
-  String column2 = "column2";
-  String column3 = "column3";
+  public static final String column1 = "column1";
+  public static final String column2 = "column2";
+  public static final String column3 = "column3";
 
-  String value1 = "Some text";
-  Integer value2 = 100;
-  Instant value3 = Instant.now();
+  public static final String value1 = "Some text";
+  public static final Integer value2 = 100;
+  public static final Instant value3 = Instant.now();
+  public static final Integer limit1 = 59;
+  public static final int offset1 = 1001;
 
   @Test
   void from() {
@@ -129,7 +132,6 @@ class QueryBuilderTest {
 
   @Test
   void from__where_criteria1_and_nested_criteria2_or_criteria3() {
-
     SqlExpression expression = query(table1).where(column2, "=", value1)
         .where(q -> q.where(column1, value2)
             .orWhere(column3, value3))
@@ -142,5 +144,66 @@ class QueryBuilderTest {
     assertThat(expression.getBindings())
         .hasSize(3)
         .containsExactly(value1, value2, value3);
+  }
+
+  @Test
+  void from__where_column_criteria() {
+    SqlExpression expression = query(table1)
+        .whereColumn(column1, column2)
+        .getSqlExpression();
+
+    assertEquals("SELECT * FROM %s WHERE %s = %s".formatted(table1, column1, column2),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__order_by() {
+    SqlExpression expression = query(table1).orderBy(column1).getSqlExpression();
+
+    assertEquals("SELECT * FROM %s ORDER BY %s ASC".formatted(table1, column1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__order_by_desc() {
+    SqlExpression expression = query(table1).orderBy(column1, DirectionEnum.DESC)
+        .getSqlExpression();
+
+    assertEquals("SELECT * FROM %s ORDER BY %s DESC".formatted(table1, column1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__limit() {
+    SqlExpression expression = query(table1).limit(limit1)
+        .getSqlExpression();
+
+    assertEquals("SELECT * FROM %s LIMIT %s".formatted(table1, limit1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__limit__offset() {
+    SqlExpression expression = query(table1).limit(limit1)
+        .offset(offset1)
+        .getSqlExpression();
+
+    assertEquals("SELECT * FROM %s LIMIT %s OFFSET %s".formatted(table1, limit1, offset1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
   }
 }

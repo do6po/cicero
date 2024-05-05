@@ -232,6 +232,8 @@ public class PgsqlQueryCollector implements QueryCollector {
       if (orderIterator.hasNext()) {
         sqlStringBuilder.append(", ");
       }
+
+      bindingResult.addAll(order.getBindings());
     }
   }
 
