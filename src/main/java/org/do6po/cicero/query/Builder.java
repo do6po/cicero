@@ -263,6 +263,10 @@ public abstract class Builder<T, B extends Builder<T, B>>
     return having(new StringHavingExpression(raw, bindings, type));
   }
 
+  public B havingRaw(String raw, List<Object> bindings) {
+    return havingRaw(raw, bindings, OperatorEnum.AND);
+  }
+
   public List<T> get() {
     return fetchResultSet(this::mapList);
   }

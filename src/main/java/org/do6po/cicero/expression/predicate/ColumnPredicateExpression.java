@@ -12,7 +12,7 @@ public class ColumnPredicateExpression implements PredicateExpression {
   @Getter private final OperatorEnum type;
 
   public ColumnPredicateExpression(
-      String second, String operator, String first, OperatorEnum type) {
+      String first, String operator, String second, OperatorEnum type) {
     this.first = first;
     this.second = second;
     this.operator = operator;

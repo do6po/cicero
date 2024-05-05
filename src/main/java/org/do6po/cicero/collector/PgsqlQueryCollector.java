@@ -63,7 +63,7 @@ public class PgsqlQueryCollector implements QueryCollector {
       fillForLimit(builder, sqlStringBuilder);
     }
 
-    if (builder.getOffset() != null) {
+    if (builder.getOffset() > 0) {
       addSpace(sqlStringBuilder);
       fillForOffset(builder, sqlStringBuilder);
     }
@@ -232,6 +232,8 @@ public class PgsqlQueryCollector implements QueryCollector {
       if (orderIterator.hasNext()) {
         sqlStringBuilder.append(", ");
       }
+
+      bindingResult.addAll(order.getBindings());
     }
   }
 
