@@ -6,6 +6,7 @@ import static org.do6po.cicero.utils.DotUtil.dot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Instant;
+import java.util.List;
 import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.expression.join.JoinExpression.JoinTypeEnum;
@@ -202,6 +203,84 @@ class QueryBuilderTest {
 
     assertEquals("SELECT * FROM %s LIMIT %s OFFSET %s".formatted(table1, limit1, offset1),
         expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__group_by() {
+    SqlExpression expression = query(table1)
+        .select(column1, "count(*)")
+        .groupBy(column1)
+        .getSqlExpression();
+
+    assertEquals("SELECT %s, count(*) FROM %s GROUP BY %s".formatted(column1, table1, column1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__group_by__having() {
+    SqlExpression expression = query(table1)
+        .select(column1, "count(*)")
+        .groupBy(column1)
+        .having(column1, ">", value2)
+        .getSqlExpression();
+
+    assertEquals(
+        "SELECT %s, count(*) FROM %s GROUP BY %s HAVING %s > (?)".formatted(column1, table1,
+            column1, column1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .hasSize(1)
+        .containsExactly(value2);
+  }
+
+  @Test
+  void from__group_by__having_raw() {
+    SqlExpression expression = query(table1)
+        .select(column1, "count(*)")
+        .groupBy(column1)
+        .havingRaw("column1 >= ?", List.of(value2))
+        .getSqlExpression();
+
+    assertEquals(
+        "SELECT %s, count(*) FROM %s GROUP BY %s HAVING column1 >= ?".formatted(column1, table1,
+            column1),
+        expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .hasSize(1)
+        .containsExactly(value2);
+  }
+
+  @Test
+  void from__union() {
+    SqlExpression expression = query(table1)
+        .select(column1, column2)
+        .union(query(table2).select(column1, column2)).getSqlExpression();
+
+    assertEquals("SELECT %s, %s FROM %s UNION (SELECT %s, %s FROM %s)".formatted(
+        column1, column2, table1, column1, column2, table2
+    ), expression.getExpression());
+
+    assertThat(expression.getBindings())
+        .isEmpty();
+  }
+
+  @Test
+  void from__union_all() {
+    SqlExpression expression = query(table1)
+        .select(column1, column2)
+        .unionAll(query(table2).select(column1, column2)).getSqlExpression();
+
+    assertEquals("SELECT %s, %s FROM %s UNION ALL (SELECT %s, %s FROM %s)".formatted(
+        column1, column2, table1, column1, column2, table2
+    ), expression.getExpression());
 
     assertThat(expression.getBindings())
         .isEmpty();
