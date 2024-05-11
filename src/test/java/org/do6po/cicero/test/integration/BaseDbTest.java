@@ -31,8 +31,15 @@ public abstract class BaseDbTest {
 
   @BeforeAll
   static void configConnection() {
-    DbConfig config = DbConfig.builder().driver(SqlDriverEnum.POSTGRESQL).database("cicero")
-        .hostname("localhost").port(25432).username("root").password("password").build();
+    DbConfig config =
+        DbConfig.builder()
+            .driver(SqlDriverEnum.POSTGRESQL)
+            .database("cicero")
+            .hostname("localhost")
+            .port(25432)
+            .username("root")
+            .password("password")
+            .build();
 
     ConnectionResolver resolver = new ConnectionResolver(Map.of("default", config));
     ConnectionResolverContainer.put(resolver);
@@ -45,5 +52,4 @@ public abstract class BaseDbTest {
   public SqlExecutor defaultSqlExecutor() {
     return sqlExecutor;
   }
-
 }

@@ -42,6 +42,11 @@
       <version>2.0.12</version>
     </dependency>
     <dependency>
+      <groupId>com.diffplug.spotless</groupId>
+      <artifactId>spotless-maven-plugin</artifactId>
+      <version>2.43.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>2.0.13</version>
@@ -83,6 +88,37 @@
           <excludes>
             <exclude>**/test/integration/**/*Test.java</exclude>
           </excludes>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>2.43.0</version>
+        <configuration>
+          <ratchetFrom>origin/develop</ratchetFrom>
+          <java>
+            <includes>
+              <include>src/main/java/**/*.java</include>
+              <include>src/test/java/**/*.java</include>
+            </includes>
+            <importOrder />
+            <removeUnusedImports />
+            <toggleOffOn/>
+            <trimTrailingWhitespace/>
+            <endWithNewline/>
+            <indent>
+              <spaces>true</spaces>
+              <spacesPerTab>2</spacesPerTab>
+            </indent>
+            <googleJavaFormat>
+              <version>1.22.0</version>                      <!-- optional, 1.8 is the minimum supported version for Java 11-->
+              <style>GOOGLE</style>                       <!-- or AOSP (optional) -->
+              <reflowLongStrings>true</reflowLongStrings> <!-- optional -->
+              <formatJavadoc>false</formatJavadoc>        <!-- optional -->
+              <!-- optional: custom group artifact (you probably don't need this) -->
+              <groupArtifact>com.google.googlejavaformat:google-java-format</groupArtifact>
+            </googleJavaFormat>
+          </java>
         </configuration>
       </plugin>
     </plugins>

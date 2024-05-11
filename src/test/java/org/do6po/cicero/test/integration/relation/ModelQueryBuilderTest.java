@@ -57,7 +57,9 @@ class ModelQueryBuilderTest extends BaseDbTest {
   void paginateOne() {
     Paginator<UserM> page = userQuery().orderBy("username").paginate(1, 5);
 
-    assertThat(page.getItems()).hasSize(5).map(UserM::getId)
+    assertThat(page.getItems())
+        .hasSize(5)
+        .map(UserM::getId)
         .contains(USER1_ID, USER2_ID, USER3_ID, USER4_ID, USER5_ID);
   }
 
@@ -85,7 +87,9 @@ class ModelQueryBuilderTest extends BaseDbTest {
     assertThat(users).hasSize(4).map(UserM::getId).contains(USER1_ID, USER2_ID, USER3_ID, USER4_ID);
 
     List<UserProfileM> profiles = users.stream().map(UserM::getProfile).toList();
-    assertThat(profiles).hasSize(4).map(UserProfileM::getUserId)
+    assertThat(profiles)
+        .hasSize(4)
+        .map(UserProfileM::getUserId)
         .contains(USER1_ID, USER2_ID, USER3_ID, USER4_ID);
   }
 }
