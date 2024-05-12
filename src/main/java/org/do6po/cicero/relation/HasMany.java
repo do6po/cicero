@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.do6po.cicero.utils.ClassUtil.getInstance;
 import static org.do6po.cicero.utils.DotUtil.dot;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import org.do6po.cicero.query.ModelQueryBuilder;
 import org.do6po.cicero.utils.StackUtil;
 
 @RequiredArgsConstructor
-public class OneToMany<
+public class HasMany<
         M extends BaseModel<M, ?>,
         F extends BaseModel<F, Q>,
         Q extends ModelQueryBuilder<F, Q>,
@@ -33,7 +34,7 @@ public class OneToMany<
 
   @Getter private final String relationName;
 
-  public OneToMany(
+  public HasMany(
       M localModel, String localAttribute, Class<F> foreignClass, String foreignAttribute) {
     this(
         localModel,
@@ -92,7 +93,9 @@ public class OneToMany<
             .collect(Collectors.groupingBy(i -> i.getAttribute(foreignAttribute)));
 
     for (M model : models) {
-      model.setRelation(getRelationName(), map.get(model.getAttribute(localAttribute)));
+      model.setRelation(
+          getRelationName(),
+          map.getOrDefault(model.getAttribute(localAttribute), new ArrayList<>()));
     }
 
     return foreignModels;

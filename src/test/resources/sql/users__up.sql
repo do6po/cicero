@@ -11,7 +11,7 @@ CREATE TABLE users
 
 DROP TABLE IF EXISTS user_profiles;
 
-CREATE TABLE IF NOT EXISTS user_profiles
+CREATE TABLE user_profiles
 (
     user_id    varchar(36) primary key  not null,
     full_name  varchar(255)             not null,
