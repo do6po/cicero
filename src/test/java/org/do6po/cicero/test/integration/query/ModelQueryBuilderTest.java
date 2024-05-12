@@ -1,7 +1,6 @@
 package org.do6po.cicero.test.integration.query;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.do6po.cicero.enums.PredicateOperatorEnum.LIKE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.darrmirr.dbchange.DbChangeExtension;
@@ -13,7 +12,6 @@ import java.util.Set;
 import org.do6po.cicero.pagination.Paginator;
 import org.do6po.cicero.test.integration.BaseDbTest;
 import org.do6po.cicero.test.integration.model.UserM;
-import org.do6po.cicero.test.integration.model.UserProfileM;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

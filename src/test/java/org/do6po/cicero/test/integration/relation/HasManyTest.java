@@ -1,6 +1,8 @@
 package org.do6po.cicero.test.integration.relation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.do6po.cicero.enums.PredicateOperatorEnum.ILIKE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import com.github.darrmirr.dbchange.DbChangeExtension;
 import com.github.darrmirr.dbchange.annotation.SqlExecutorGetter;
@@ -30,6 +32,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
     },
     executionPhase = ExecutionPhase.AFTER_ALL)
 class HasManyTest extends BaseDbTest {
+
+  public static final String ORDER_COUNT = "order_count";
 
   @Test
   void hasMany() {
@@ -64,5 +68,28 @@ class HasManyTest extends BaseDbTest {
         .contains(USER2_ORDER1_ID, USER2_ORDER2_ID, USER2_ORDER3_ID);
 
     assertThat(users.whereKey(USER3_ID).getOrders()).isEmpty();
+  }
+
+  @Test
+  void findUsersWhereHasSomeTextInOrderDescription() {
+    ModelList<UserM, UserQB> users =
+        userQuery()
+            .whereHas(UserM::orders, b -> b.where("description", ILIKE, "%ipsum%"))
+            .get(ModelList::new);
+
+    assertThat(users).hasSize(2).map(UserM::getId).contains(USER1_ID, USER2_ID);
+  }
+
+  @Test
+  void withOrderCount() {
+    ModelList<UserM, UserQB> users =
+        userQuery().withCount(UserM::orders, ORDER_COUNT).get(ModelList::new);
+
+    assertEquals(2, (Long) users.whereKey(USER1_ID).getAttribute(ORDER_COUNT));
+    assertEquals(3, (Long) users.whereKey(USER2_ID).getAttribute(ORDER_COUNT));
+    assertEquals(0, (Long) users.whereKey(USER3_ID).getAttribute(ORDER_COUNT));
+    assertEquals(0, (Long) users.whereKey(USER4_ID).getAttribute(ORDER_COUNT));
+    assertEquals(0, (Long) users.whereKey(USER5_ID).getAttribute(ORDER_COUNT));
+    assertEquals(1, (Long) users.whereKey(USER6_ID).getAttribute(ORDER_COUNT));
   }
 }
