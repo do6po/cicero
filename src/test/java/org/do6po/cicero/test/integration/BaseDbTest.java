@@ -10,7 +10,11 @@ import org.do6po.cicero.component.ConnectionResolverContainer;
 import org.do6po.cicero.configuration.ConnectionResolver;
 import org.do6po.cicero.configuration.DbConfig;
 import org.do6po.cicero.configuration.SqlDriverEnum;
+import org.do6po.cicero.test.integration.model.BrandM;
+import org.do6po.cicero.test.integration.model.ProductM;
 import org.do6po.cicero.test.integration.model.UserM;
+import org.do6po.cicero.test.integration.model.builder.BrandQB;
+import org.do6po.cicero.test.integration.model.builder.ProductQB;
 import org.do6po.cicero.test.integration.model.builder.UserQB;
 import org.junit.jupiter.api.BeforeAll;
 
@@ -29,6 +33,20 @@ public abstract class BaseDbTest {
   public static final String USER2_ORDER2_ID = "532cd78f-3289-4f64-8307-5664a2645e07";
   public static final String USER2_ORDER3_ID = "a0e21a4a-5d2b-49dd-a4c0-c6b3e56d047b";
   public static final String USER6_ORDER1_ID = "44cf0f62-b76f-4372-83f7-99ce1b5b96f9";
+
+  public static final String PRODUCT1_ID = "116d9889-cc74-47da-b37b-3570ca4acb2b";
+  public static final String PRODUCT2_ID = "a8eb7881-0ff8-4ce8-8565-7583d17081f9";
+  public static final String PRODUCT3_ID = "43c92224-2a55-4ee8-bd83-31ac69c07c04";
+  public static final String PRODUCT4_ID = "3e5a1062-9653-48ce-bac1-8fbfdad08175";
+  public static final String PRODUCT5_ID = "744be470-0de0-484d-85e4-5939653c1561";
+  public static final String PRODUCT6_ID = "556f75bc-c855-4339-ad75-5c9c8b3bd35b";
+  public static final String PRODUCT7_ID = "34a6453a-df08-4f52-90ca-a3e3e7d38583";
+
+  public static final String MEDIA1_ID = "d12bc519-e4bb-4f3f-95c4-a54f76a47dd6";
+  public static final String MEDIA2_ID = "7991bcfa-0350-4ee2-b560-f23016baafd0";
+  public static final String MEDIA3_ID = "37a830f1-b127-4ff9-b009-09d321b5e031";
+  public static final String MEDIA4_ID = "9a223c97-6c4c-4cd5-a24e-c76461fa0970";
+  public static final String MEDIA5_ID = "2c60f753-91a4-420d-83b3-f24b1b12ca2a";
 
   protected static SqlExecutor sqlExecutor;
 
@@ -61,6 +79,14 @@ public abstract class BaseDbTest {
 
   protected static UserQB userQuery() {
     return query(UserM.class);
+  }
+
+  protected static ProductQB productQuery() {
+    return query(ProductM.class);
+  }
+
+  protected static BrandQB brandQuery() {
+    return query(BrandM.class);
   }
 
   public SqlExecutor defaultSqlExecutor() {

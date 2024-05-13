@@ -302,12 +302,12 @@ public abstract class Builder<T, B extends Builder<T, B>>
     } catch (SQLException e) {
       String message =
           """
-           Builder.fetchResultSet error:
-           %s
-           Sql state: '%s'.
-           Query: '%s'.
-           Bindings: (%s).
-           """
+          Builder.fetchResultSet error:
+          %s
+          Sql state: '%s'.
+          Query: '%s'.
+          Bindings: (%s).
+          """
               .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
 
       log.error(message, e);
@@ -319,6 +319,10 @@ public abstract class Builder<T, B extends Builder<T, B>>
   private static Object normalizeBindings(Object binding) {
     if (binding instanceof Enum<?> value) {
       return value.name();
+    }
+
+    if (binding instanceof Class<?> bClass) {
+      return bClass.getCanonicalName();
     }
 
     return binding;
