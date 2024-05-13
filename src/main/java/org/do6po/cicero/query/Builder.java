@@ -58,8 +58,8 @@ import org.do6po.cicero.expression.union.UnionExpression;
 import org.do6po.cicero.iterator.ResultSetChunkIterator;
 import org.do6po.cicero.pagination.Paginator;
 import org.do6po.cicero.pagination.SimplePaginator;
+import org.do6po.cicero.utils.BindingNormalizeUtil;
 
-/** Ciceron */
 @Slf4j
 public abstract class Builder<T, B extends Builder<T, B>>
     implements CriteriaBuilder<B>, QueryExpression {
@@ -285,7 +285,7 @@ public abstract class Builder<T, B extends Builder<T, B>>
       int i = 1;
 
       for (Object binding : bindings) {
-        preparedStatement.setObject(i++, normalizeBindings(binding));
+        preparedStatement.setObject(i++, BindingNormalizeUtil.normalize(binding));
       }
 
       ResultSet resultSet = preparedStatement.executeQuery();
@@ -314,18 +314,6 @@ public abstract class Builder<T, B extends Builder<T, B>>
 
       throw new RuntimeException(message, e);
     }
-  }
-
-  private static Object normalizeBindings(Object binding) {
-    if (binding instanceof Enum<?> value) {
-      return value.name();
-    }
-
-    if (binding instanceof Class<?> bClass) {
-      return bClass.getCanonicalName();
-    }
-
-    return binding;
   }
 
   protected List<T> mapList(ResultSet resultSet) {
