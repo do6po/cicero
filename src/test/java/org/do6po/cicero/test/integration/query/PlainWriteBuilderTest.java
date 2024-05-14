@@ -7,8 +7,8 @@ import com.github.darrmirr.dbchange.annotation.SqlExecutorGetter;
 import com.github.darrmirr.dbchange.annotation.onclass.DbChangeOnce;
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.Map;
 import org.do6po.cicero.query.PlainWriteBuilder;
+import org.do6po.cicero.query.PredicateAttributes;
 import org.do6po.cicero.test.integration.BaseDbTest;
 import org.junit.jupiter.api.Test;
 
@@ -23,20 +23,20 @@ public class PlainWriteBuilderTest extends BaseDbTest {
   void insert() {
     String id = randomUUID().toString();
 
-    Map<String, Object> values =
-        Map.of(
-            "id",
-            id,
-            "username",
-            "User Name",
-            "created_at",
-            Timestamp.from(Instant.now()),
-            "updated_at",
-            Timestamp.from(Instant.now()));
+    PredicateAttributes attrs = new PredicateAttributes();
+
+    attrs.put("id", id);
+    attrs.put("username", "User Name");
+    attrs.put("created_at", Timestamp.from(Instant.now()));
+    attrs.put("updated_at", Timestamp.from(Instant.now()));
 
     assertTrue(userQuery().whereKey(id).doesNotExists());
 
-    PlainWriteBuilder.query("users").insert(values);
+    startQueryCount();
+
+    PlainWriteBuilder.query("users").insert(attrs.getAttributes());
+
+    assertQueryCount(1);
 
     assertTrue(userQuery().whereKey(id).exists());
   }

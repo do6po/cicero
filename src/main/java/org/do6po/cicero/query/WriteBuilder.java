@@ -7,8 +7,4 @@ public abstract class WriteBuilder<T, B extends WriteBuilder<T, B>> extends Buil
   public int insert(Map<String, Object> value) {
     return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileInsert(this, value));
   }
-
-  public int insertOrIgnore(Map<String, Object> value) {
-    return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileInsert(this, value));
-  }
 }
