@@ -64,7 +64,7 @@ public class MorphMany<
         foreignModelClass,
         foreignReferenceTypeAttribute,
         foreignReferenceIdAttribute,
-        foreignModelClass);
+        localModel.getClass());
   }
 
   protected Q getForeignBuilder() {
