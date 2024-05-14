@@ -22,7 +22,8 @@ class GraphNodeTest {
     assertThat(actual).hasSize(1);
 
     assertThat(actual.stream().findFirst().orElseThrow().getValue())
-        .isEqualToComparingFieldByField(new GraphNode());
+        .usingRecursiveComparison()
+        .isEqualTo(new GraphNode());
   }
 
   @Test
