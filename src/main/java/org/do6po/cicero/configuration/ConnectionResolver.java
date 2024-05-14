@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import org.do6po.cicero.exception.CiceroConnectionException;
-import org.do6po.cicero.interceptor.ConnectionInterceptor;
 
 @NoArgsConstructor
 public class ConnectionResolver {
@@ -36,13 +35,5 @@ public class ConnectionResolver {
     }
 
     throw new CiceroConnectionException("Connection '%s' not found!".formatted(name));
-  }
-
-  public ConnectionInterceptor getInterceptor(@NonNull String name) {
-    if (connections.containsKey(name)) {
-      return connections.get(name).getInterceptor();
-    }
-
-    throw new CiceroConnectionException("Interceptor '%s' not found!".formatted(name));
   }
 }

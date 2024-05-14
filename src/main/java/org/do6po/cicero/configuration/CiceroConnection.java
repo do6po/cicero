@@ -21,11 +21,11 @@ public class CiceroConnection implements DbDriver {
     this.grammar = grammar;
 
     try {
-      this.connection = dataSource.getConnection();
+      this.connection = new CiceroConnectionDelegate(dataSource.getConnection());
     } catch (SQLException e) {
       throw new CiceroConnectionException("Connection failed!", e);
     }
 
-    this.interceptor = new CiceroConnectionDelegate(connection);
+    this.interceptor = (ConnectionInterceptor) this.connection;
   }
 }
