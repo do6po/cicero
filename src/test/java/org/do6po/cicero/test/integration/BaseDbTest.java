@@ -1,7 +1,9 @@
 package org.do6po.cicero.test.integration;
 
 import static org.do6po.cicero.query.ModelQueryBuilder.query;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import com.github.darrmirr.dbchange.DbChangeExtension;
 import com.github.darrmirr.dbchange.sql.executor.DefaultSqlExecutor;
 import com.github.darrmirr.dbchange.sql.executor.SqlExecutor;
 import com.zaxxer.hikari.HikariDataSource;
@@ -10,6 +12,7 @@ import org.do6po.cicero.component.ConnectionResolverContainer;
 import org.do6po.cicero.configuration.ConnectionResolver;
 import org.do6po.cicero.configuration.DbConfig;
 import org.do6po.cicero.configuration.SqlDriverEnum;
+import org.do6po.cicero.interceptor.CiceroConnectionInterceptor;
 import org.do6po.cicero.test.integration.model.BrandM;
 import org.do6po.cicero.test.integration.model.ProductM;
 import org.do6po.cicero.test.integration.model.UserM;
@@ -17,7 +20,10 @@ import org.do6po.cicero.test.integration.model.builder.BrandQB;
 import org.do6po.cicero.test.integration.model.builder.ProductQB;
 import org.do6po.cicero.test.integration.model.builder.UserQB;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
 
+@ExtendWith(DbChangeExtension.class)
 public abstract class BaseDbTest {
 
   public static final String USER1_ID = "4fbcfc50-7dda-4c1c-b358-30e70cb8b6d8";
@@ -47,8 +53,10 @@ public abstract class BaseDbTest {
   public static final String MEDIA3_ID = "37a830f1-b127-4ff9-b009-09d321b5e031";
   public static final String MEDIA4_ID = "9a223c97-6c4c-4cd5-a24e-c76461fa0970";
   public static final String MEDIA5_ID = "2c60f753-91a4-420d-83b3-f24b1b12ca2a";
+  public static final String CONNECTION_NAME_DEFAULT = "default";
 
   protected static SqlExecutor sqlExecutor;
+  protected static CiceroConnectionInterceptor interceptor;
 
   @BeforeAll
   static void configSqlExecutor() {
@@ -73,8 +81,31 @@ public abstract class BaseDbTest {
             .password("password")
             .build();
 
-    ConnectionResolver resolver = new ConnectionResolver(Map.of("default", config));
+    ConnectionResolver resolver = new ConnectionResolver(Map.of(CONNECTION_NAME_DEFAULT, config));
     ConnectionResolverContainer.put(resolver);
+
+    interceptor = resolver.getInterceptor(CONNECTION_NAME_DEFAULT);
+  }
+
+  @BeforeEach
+  void setUp() {
+    stopQueryCount();
+  }
+
+  protected void startQueryCount() {
+    interceptor.startQueryCount();
+  }
+
+  protected Long getQueryCount() {
+    return interceptor.getQueryCount();
+  }
+
+  protected void stopQueryCount() {
+    interceptor.stopQueryCount();
+  }
+
+  protected void assertQueryCount(Integer count) {
+    assertEquals(Long.valueOf(count), getQueryCount());
   }
 
   protected static UserQB userQuery() {

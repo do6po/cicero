@@ -3,7 +3,6 @@ package org.do6po.cicero.test.integration.query;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.github.darrmirr.dbchange.DbChangeExtension;
 import com.github.darrmirr.dbchange.annotation.SqlExecutorGetter;
 import com.github.darrmirr.dbchange.annotation.onclass.DbChangeOnce;
 import com.github.darrmirr.dbchange.annotation.onclass.DbChangeOnce.ExecutionPhase;
@@ -13,9 +12,7 @@ import org.do6po.cicero.pagination.Paginator;
 import org.do6po.cicero.test.integration.BaseDbTest;
 import org.do6po.cicero.test.integration.model.UserM;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 
-@ExtendWith(DbChangeExtension.class)
 @SqlExecutorGetter("defaultSqlExecutor")
 @DbChangeOnce(sqlQueryFiles = "sql/users__up.sql")
 @DbChangeOnce(sqlQueryFiles = "sql/users__down.sql", executionPhase = ExecutionPhase.AFTER_ALL)
