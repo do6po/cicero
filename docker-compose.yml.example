@@ -9,12 +9,12 @@ services:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: password
     networks:
-      - yeenergy
+      - cicero
     ports:
       - "25432:5432"
     tmpfs:
       - /var/lib/postgresql/data
 
 networks:
-  yeenergy:
+  cicero:
     driver: bridge

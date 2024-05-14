@@ -3,7 +3,6 @@ package org.do6po.cicero.query;
 import static org.do6po.cicero.utils.ClassUtil.getInstance;
 import static org.do6po.cicero.utils.ClassUtil.guessType;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,6 +28,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.do6po.cicero.collector.QueryCollectorFactory;
 import org.do6po.cicero.component.ConnectionResolverContainer;
+import org.do6po.cicero.configuration.DbDriver;
 import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.enums.OperatorEnum;
 import org.do6po.cicero.enums.PredicateOperatorEnum;
@@ -279,8 +279,9 @@ public abstract class Builder<T, B extends Builder<T, B>>
         bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
 
     try {
-      Connection connection = getConnection();
-      PreparedStatement preparedStatement = connection.prepareStatement(sqlExpression);
+      DbDriver dbDriver = getDbDriver();
+      PreparedStatement preparedStatement =
+          dbDriver.getConnection().prepareStatement(sqlExpression);
 
       int i = 1;
 
@@ -408,7 +409,7 @@ public abstract class Builder<T, B extends Builder<T, B>>
     return COLLECTOR_FACTORY.create().collectExpression(self());
   }
 
-  public Connection getConnection() {
+  public DbDriver getDbDriver() {
     return ConnectionResolverContainer.getConnection(connection);
   }
 

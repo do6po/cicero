@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.darrmirr.dbchange.DbChangeExtension;
 import com.github.darrmirr.dbchange.sql.executor.DefaultSqlExecutor;
 import com.github.darrmirr.dbchange.sql.executor.SqlExecutor;
-import com.zaxxer.hikari.HikariDataSource;
 import java.util.Map;
 import org.do6po.cicero.component.ConnectionResolverContainer;
 import org.do6po.cicero.configuration.ConnectionResolver;
 import org.do6po.cicero.configuration.DbConfig;
+import org.do6po.cicero.configuration.DbDriver;
 import org.do6po.cicero.configuration.SqlDriverEnum;
-import org.do6po.cicero.interceptor.CiceroConnectionInterceptor;
+import org.do6po.cicero.interceptor.ConnectionInterceptor;
 import org.do6po.cicero.test.integration.model.BrandM;
 import org.do6po.cicero.test.integration.model.ProductM;
 import org.do6po.cicero.test.integration.model.UserM;
@@ -56,18 +56,7 @@ public abstract class BaseDbTest {
   public static final String CONNECTION_NAME_DEFAULT = "default";
 
   protected static SqlExecutor sqlExecutor;
-  protected static CiceroConnectionInterceptor interceptor;
-
-  @BeforeAll
-  static void configSqlExecutor() {
-    HikariDataSource ds = new HikariDataSource();
-    ds.setDriverClassName("org.postgresql.Driver");
-    ds.setJdbcUrl("jdbc:postgresql://localhost:25432/cicero");
-    ds.setUsername("root");
-    ds.setPassword("password");
-
-    sqlExecutor = new DefaultSqlExecutor(ds);
-  }
+  protected static ConnectionInterceptor interceptor;
 
   @BeforeAll
   static void configConnection() {
@@ -84,7 +73,10 @@ public abstract class BaseDbTest {
     ConnectionResolver resolver = new ConnectionResolver(Map.of(CONNECTION_NAME_DEFAULT, config));
     ConnectionResolverContainer.put(resolver);
 
-    interceptor = resolver.getInterceptor(CONNECTION_NAME_DEFAULT);
+    DbDriver connection = resolver.getConnection(CONNECTION_NAME_DEFAULT);
+
+    sqlExecutor = new DefaultSqlExecutor(connection.getDataSource());
+    interceptor = connection.getInterceptor();
   }
 
   @BeforeEach

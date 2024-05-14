@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class CiceroConnectionDelegate implements Connection, CiceroConnectionInterceptor {
+public class CiceroConnectionDelegate implements Connection, ConnectionInterceptor {
 
   private final Connection delegate;
 

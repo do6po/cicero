@@ -4,10 +4,14 @@ import java.util.LinkedHashMap;
 import lombok.Getter;
 
 @Getter
-public class PredicateAttributes {
+public class AttributeHolder {
   private final LinkedHashMap<String, Object> attributes = new LinkedHashMap<>();
 
-  public PredicateAttributes put(String column, Object value) {
+  public static AttributeHolder attrs() {
+    return new AttributeHolder();
+  }
+
+  public AttributeHolder put(String column, Object value) {
     attributes.put(column, value);
 
     return this;
