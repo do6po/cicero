@@ -1,8 +1,8 @@
 package org.do6po.cicero.component;
 
-import java.sql.Connection;
 import java.util.Objects;
 import org.do6po.cicero.configuration.ConnectionResolver;
+import org.do6po.cicero.configuration.DbDriver;
 
 public class ConnectionResolverContainer {
   private static ConnectionResolver resolver;
@@ -19,7 +19,7 @@ public class ConnectionResolverContainer {
     return resolver;
   }
 
-  public static Connection getConnection(String name) {
+  public static DbDriver getConnection(String name) {
     return get().getConnection(name);
   }
 }

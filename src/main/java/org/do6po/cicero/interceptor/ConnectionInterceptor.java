@@ -1,6 +1,6 @@
 package org.do6po.cicero.interceptor;
 
-public interface CiceroConnectionInterceptor {
+public interface ConnectionInterceptor {
   void startQueryCount();
 
   void stopQueryCount();

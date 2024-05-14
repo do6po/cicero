@@ -1,6 +1,6 @@
 package org.do6po.cicero.exception;
 
-public class CiceroConnectionException extends RuntimeException {
+public class CiceroConnectionException extends BaseException {
 
   public CiceroConnectionException(String message) {
     super(message);
