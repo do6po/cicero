@@ -35,11 +35,26 @@ CREATE TABLE media
 
 CREATE INDEX IF NOT EXISTS media_reference_index ON media (reference_type, reference_id);
 
-INSERT INTO brands (id,
-                    name,
-                    description,
-                    created_at,
-                    updated_at)
+DROP TABLE IF EXISTS categories;
+CREATE TABLE categories
+(
+    id         varchar(36) primary key  not null,
+    name       varchar(1024)            not null,
+    created_at timestamp with time zone not null,
+    updated_at timestamp with time zone not null
+);
+
+DROP TABLE IF EXISTS product_category;
+CREATE TABLE product_category
+(
+    product_id  varchar(36) not null,
+    category_id varchar(36) not null
+);
+
+CREATE INDEX IF NOT EXISTS product_category_product_id_category_id_index ON product_category (product_id, category_id);
+
+
+INSERT INTO brands (id, name, description, created_at, updated_at)
 VALUES ('00c146fd-12f2-413b-b7b5-cbd5857586d6', 'brand a',
         'Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo',
         current_timestamp, current_timestamp),
@@ -102,4 +117,25 @@ VALUES ('d12bc519-e4bb-4f3f-95c4-a54f76a47dd6', 'org.do6po.cicero.test.integrati
        ('2c60f753-91a4-420d-83b3-f24b1b12ca2a', 'org.do6po.cicero.test.integration.model.BrandM',
         '00c146fd-12f2-413b-b7b5-cbd5857586d6',
         '', '', '', current_timestamp, current_timestamp)
+;
+
+INSERT INTO categories (id, name, created_at, updated_at)
+VALUES ('47d347e4-0c7b-47ce-975f-4f4f92b9ca0a', 'category first', current_timestamp,
+        current_timestamp),
+       ('61252e97-80f4-4212-9ecb-76f3f7487718', 'category second', current_timestamp,
+        current_timestamp),
+       ('4a52e36c-3d78-4c4b-a9e5-569251ea74ab', 'category third', current_timestamp,
+        current_timestamp),
+       ('b1771a71-e956-4b13-a89b-eaa0be296866', 'category forth', current_timestamp,
+        current_timestamp)
+;
+
+INSERT INTO product_category (product_id, category_id)
+VALUES ('116d9889-cc74-47da-b37b-3570ca4acb2b', '47d347e4-0c7b-47ce-975f-4f4f92b9ca0a'),
+       ('116d9889-cc74-47da-b37b-3570ca4acb2b', '61252e97-80f4-4212-9ecb-76f3f7487718'),
+       ('a8eb7881-0ff8-4ce8-8565-7583d17081f9', '47d347e4-0c7b-47ce-975f-4f4f92b9ca0a'),
+       ('a8eb7881-0ff8-4ce8-8565-7583d17081f9', '61252e97-80f4-4212-9ecb-76f3f7487718'),
+       ('a8eb7881-0ff8-4ce8-8565-7583d17081f9', '4a52e36c-3d78-4c4b-a9e5-569251ea74ab'),
+       ('43c92224-2a55-4ee8-bd83-31ac69c07c04', '4a52e36c-3d78-4c4b-a9e5-569251ea74ab'),
+       ('34a6453a-df08-4f52-90ca-a3e3e7d38583', '4a52e36c-3d78-4c4b-a9e5-569251ea74ab')
 ;
