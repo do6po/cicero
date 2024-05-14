@@ -1,14 +1,15 @@
 package org.do6po.cicero.test.integration.query;
 
 import static java.util.UUID.randomUUID;
+import static org.do6po.cicero.query.AttributeHolder.attrs;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.darrmirr.dbchange.annotation.SqlExecutorGetter;
 import com.github.darrmirr.dbchange.annotation.onclass.DbChangeOnce;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.LinkedHashMap;
 import org.do6po.cicero.query.PlainWriteBuilder;
-import org.do6po.cicero.query.PredicateAttributes;
 import org.do6po.cicero.test.integration.BaseDbTest;
 import org.junit.jupiter.api.Test;
 
@@ -23,21 +24,22 @@ public class PlainWriteBuilderTest extends BaseDbTest {
   void insert() {
     String id = randomUUID().toString();
 
-    PredicateAttributes attrs = new PredicateAttributes();
+    LinkedHashMap<String, Object> attrs =
+        attrs()
+            .put("id", id)
+            .put("username", "User Name")
+            .put("created_at", Timestamp.from(Instant.now()))
+            .put("updated_at", Timestamp.from(Instant.now()))
+            .getAttributes();
 
-    attrs.put("id", id);
-    attrs.put("username", "User Name");
-    attrs.put("created_at", Timestamp.from(Instant.now()));
-    attrs.put("updated_at", Timestamp.from(Instant.now()));
-
-    assertTrue(userQuery().whereKey(id).doesNotExists());
+    assertTrue(userQuery().whereAre(attrs).doesNotExists());
 
     startQueryCount();
 
-    PlainWriteBuilder.query("users").insert(attrs.getAttributes());
+    PlainWriteBuilder.query("users").insert(attrs);
 
     assertQueryCount(1);
 
-    assertTrue(userQuery().whereKey(id).exists());
+    assertTrue(userQuery().whereAre(attrs).exists());
   }
 }

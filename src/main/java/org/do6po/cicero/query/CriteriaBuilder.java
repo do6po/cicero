@@ -43,8 +43,8 @@ public interface CriteriaBuilder<B extends CriteriaBuilder<B>> {
     return self();
   }
 
-  default B whereAre(Consumer<PredicateAttributes> consumer) {
-    PredicateAttributes attributes = new PredicateAttributes();
+  default B whereAre(Consumer<AttributeHolder> consumer) {
+    AttributeHolder attributes = new AttributeHolder();
 
     consumer.accept(attributes);
 
@@ -53,8 +53,8 @@ public interface CriteriaBuilder<B extends CriteriaBuilder<B>> {
     return self();
   }
 
-  default B orWhereAre(Consumer<PredicateAttributes> consumer) {
-    PredicateAttributes attributes = new PredicateAttributes();
+  default B orWhereAre(Consumer<AttributeHolder> consumer) {
+    AttributeHolder attributes = new AttributeHolder();
 
     consumer.accept(attributes);
 
