@@ -4,8 +4,10 @@ import java.util.List;
 import lombok.Getter;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.relation.ManyToMany;
+import org.do6po.cicero.relation.ManyToOne;
 import org.do6po.cicero.relation.MorphMany;
 import org.do6po.cicero.relation.Relation;
+import org.do6po.cicero.test.integration.model.builder.BrandQB;
 import org.do6po.cicero.test.integration.model.builder.CategoryQB;
 import org.do6po.cicero.test.integration.model.builder.MediaQB;
 import org.do6po.cicero.test.integration.model.builder.ProductQB;
@@ -33,5 +35,13 @@ public class ProductM extends BaseModel<ProductM, ProductQB> {
 
   public List<CategoryM> getCategories() {
     return getRelation(ProductM::categories);
+  }
+
+  public Relation<ProductM, BrandM, BrandQB, BrandM> brand() {
+    return new ManyToOne<>(this, "brand_id", BrandM.class, "id");
+  }
+
+  public BrandM getBrand() {
+    return getRelation(ProductM::brand);
   }
 }
