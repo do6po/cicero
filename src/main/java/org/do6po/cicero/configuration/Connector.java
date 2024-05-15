@@ -10,6 +10,6 @@ public class Connector implements ConnectorInterface {
     c.setUsername(config.getUsername());
     c.setPassword(config.getPassword());
 
-    return new CiceroConnection(new HikariDataSource(c), GrammarResolver.get(config.getDriver()));
+    return new CiceroConnection(new HikariDataSource(c), GrammarFactory.get(config.getDriver()));
   }
 }

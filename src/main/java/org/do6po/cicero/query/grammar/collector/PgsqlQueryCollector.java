@@ -1,4 +1,4 @@
-package org.do6po.cicero.collector;
+package org.do6po.cicero.query.grammar.collector;
 
 import java.util.ArrayList;
 import java.util.Iterator;
