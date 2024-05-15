@@ -26,7 +26,6 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.do6po.cicero.collector.QueryCollectorFactory;
 import org.do6po.cicero.component.ConnectionResolverContainer;
 import org.do6po.cicero.configuration.DbDriver;
 import org.do6po.cicero.enums.DirectionEnum;
@@ -63,8 +62,6 @@ import org.do6po.cicero.utils.BindingNormalizeUtil;
 @Slf4j
 public abstract class Builder<T, B extends Builder<T, B>>
     implements CriteriaBuilder<B>, QueryExpression {
-
-  public static final QueryCollectorFactory COLLECTOR_FACTORY = new QueryCollectorFactory();
 
   public static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
 
@@ -406,7 +403,7 @@ public abstract class Builder<T, B extends Builder<T, B>>
   }
 
   public SqlExpression getSqlExpression() {
-    return COLLECTOR_FACTORY.create().collectExpression(self());
+    return getDbDriver().getGrammar().getQueryCollector().collectExpression(self());
   }
 
   public DbDriver getDbDriver() {

@@ -1,14 +1,16 @@
 package org.do6po.cicero.query.grammar;
 
+import java.util.List;
+import java.util.Map;
 import org.do6po.cicero.exception.BaseException;
 import org.do6po.cicero.expression.from.FromExpression;
 import org.do6po.cicero.expression.write.WriteExpression;
 import org.do6po.cicero.query.Builder;
-
-import java.util.List;
-import java.util.Map;
+import org.do6po.cicero.query.grammar.collector.QueryCollector;
 
 public abstract class Grammar {
+
+  public abstract QueryCollector getQueryCollector();
 
   public WriteExpression compileInsert(Builder<?, ?> builder, Map<String, Object> value) {
     throw new BaseException("compileInsert is not implemented by given grammar");

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum SqlDriverEnum {
-  MYSQL("mysql"),
   POSTGRESQL("postgresql");
 
   private final String type;

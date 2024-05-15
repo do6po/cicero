@@ -1,4 +1,4 @@
-package org.do6po.cicero.collector;
+package org.do6po.cicero.query.grammar.collector;
 
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.query.Builder;
