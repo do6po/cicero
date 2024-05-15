@@ -7,6 +7,7 @@ import com.github.darrmirr.dbchange.DbChangeExtension;
 import com.github.darrmirr.dbchange.sql.executor.DefaultSqlExecutor;
 import com.github.darrmirr.dbchange.sql.executor.SqlExecutor;
 import java.util.Map;
+import java.util.Objects;
 import org.do6po.cicero.component.ConnectionResolverContainer;
 import org.do6po.cicero.configuration.ConnectionResolver;
 import org.do6po.cicero.configuration.DbConfig;
@@ -25,6 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(DbChangeExtension.class)
 public abstract class BaseDbTest {
+
+  public static final String CONNECTION_NAME_DEFAULT = "default";
 
   public static final String USER1_ID = "4fbcfc50-7dda-4c1c-b358-30e70cb8b6d8";
   public static final String USER2_ID = "2249fa0d-766d-41e5-9b7a-2ca0961d1ab6";
@@ -53,30 +56,51 @@ public abstract class BaseDbTest {
   public static final String MEDIA3_ID = "37a830f1-b127-4ff9-b009-09d321b5e031";
   public static final String MEDIA4_ID = "9a223c97-6c4c-4cd5-a24e-c76461fa0970";
   public static final String MEDIA5_ID = "2c60f753-91a4-420d-83b3-f24b1b12ca2a";
-  public static final String CONNECTION_NAME_DEFAULT = "default";
+
+  public static final String CATEGORY1_ID = "47d347e4-0c7b-47ce-975f-4f4f92b9ca0a";
+  public static final String CATEGORY2_ID = "61252e97-80f4-4212-9ecb-76f3f7487718";
+  public static final String CATEGORY3_ID = "4a52e36c-3d78-4c4b-a9e5-569251ea74ab";
+  public static final String CATEGORY4_ID = "b1771a71-e956-4b13-a89b-eaa0be296866";
 
   protected static SqlExecutor sqlExecutor;
   protected static ConnectionInterceptor interceptor;
 
+  protected static DbConfig getDbConfig() {
+    return DbConfig.builder()
+        .driver(SqlDriverEnum.POSTGRESQL)
+        .database("cicero")
+        .hostname("localhost")
+        .port(25432)
+        .username("root")
+        .password("password")
+        .build();
+  }
+
   @BeforeAll
   static void configConnection() {
-    DbConfig config =
-        DbConfig.builder()
-            .driver(SqlDriverEnum.POSTGRESQL)
-            .database("cicero")
-            .hostname("localhost")
-            .port(25432)
-            .username("root")
-            .password("password")
-            .build();
+    if (!ConnectionResolverContainer.has()) {
+      ConnectionResolverContainer.put(
+          new ConnectionResolver(Map.of(CONNECTION_NAME_DEFAULT, getDbConfig())));
+    }
 
-    ConnectionResolver resolver = new ConnectionResolver(Map.of(CONNECTION_NAME_DEFAULT, config));
-    ConnectionResolverContainer.put(resolver);
+    ConnectionResolver resolver = ConnectionResolverContainer.get();
 
     DbDriver connection = resolver.getConnection(CONNECTION_NAME_DEFAULT);
 
     sqlExecutor = new DefaultSqlExecutor(connection.getDataSource());
     interceptor = connection.getInterceptor();
+  }
+
+  protected static UserQB userQuery() {
+    return query(UserM.class);
+  }
+
+  protected static ProductQB productQuery() {
+    return query(ProductM.class);
+  }
+
+  protected static BrandQB brandQuery() {
+    return query(BrandM.class);
   }
 
   @BeforeEach
@@ -97,19 +121,13 @@ public abstract class BaseDbTest {
   }
 
   protected void assertQueryCount(Integer count) {
-    assertEquals(Long.valueOf(count), getQueryCount());
-  }
+    Long queryCount = getQueryCount();
 
-  protected static UserQB userQuery() {
-    return query(UserM.class);
-  }
+    if (Objects.isNull(queryCount)) {
+      throw new AssertionError("Query count is not started!");
+    }
 
-  protected static ProductQB productQuery() {
-    return query(ProductM.class);
-  }
-
-  protected static BrandQB brandQuery() {
-    return query(BrandM.class);
+    assertEquals(Long.valueOf(count), queryCount);
   }
 
   public SqlExecutor defaultSqlExecutor() {

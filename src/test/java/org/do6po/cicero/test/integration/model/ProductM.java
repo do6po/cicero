@@ -3,8 +3,10 @@ package org.do6po.cicero.test.integration.model;
 import java.util.List;
 import lombok.Getter;
 import org.do6po.cicero.model.BaseModel;
+import org.do6po.cicero.relation.ManyToMany;
 import org.do6po.cicero.relation.MorphMany;
 import org.do6po.cicero.relation.Relation;
+import org.do6po.cicero.test.integration.model.builder.CategoryQB;
 import org.do6po.cicero.test.integration.model.builder.MediaQB;
 import org.do6po.cicero.test.integration.model.builder.ProductQB;
 
@@ -22,5 +24,14 @@ public class ProductM extends BaseModel<ProductM, ProductQB> {
 
   public List<MediaM> getMedia() {
     return getRelation(ProductM::media);
+  }
+
+  public Relation<ProductM, CategoryM, CategoryQB, List<CategoryM>> categories() {
+    return new ManyToMany<>(
+        this, "id", "product_category", "product_id", "category_id", "id", CategoryM.class);
+  }
+
+  public List<CategoryM> getCategories() {
+    return getRelation(ProductM::categories);
   }
 }

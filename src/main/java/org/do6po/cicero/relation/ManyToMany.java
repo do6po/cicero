@@ -79,7 +79,7 @@ public class ManyToMany<
 
   @Override
   public Optional<F> first() {
-    return findByLocalKeys(Set.of(localModel.getAttribute(localAttribute))).one().first();
+    return findByLocalKeys(Set.of(getLocalAttributeValue())).one().first();
   }
 
   protected Q findByLocalKeys(Collection<Object> localKeys) {
@@ -94,7 +94,7 @@ public class ManyToMany<
 
   @Override
   public List<F> get() {
-    return findByLocalKeys(Set.of(localModel.getAttribute(localAttribute))).get();
+    return findByLocalKeys(Set.of(getLocalAttributeValue())).get();
   }
 
   @Override
@@ -137,5 +137,9 @@ public class ManyToMany<
     }
 
     return foreignModels;
+  }
+
+  protected Object getLocalAttributeValue() {
+    return localModel.getAttribute(localAttribute);
   }
 }
