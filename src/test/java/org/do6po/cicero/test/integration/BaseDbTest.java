@@ -43,6 +43,12 @@ public abstract class BaseDbTest {
   public static final String USER2_ORDER3_ID = "a0e21a4a-5d2b-49dd-a4c0-c6b3e56d047b";
   public static final String USER6_ORDER1_ID = "44cf0f62-b76f-4372-83f7-99ce1b5b96f9";
 
+  public static final String BRAND1_ID = "00c146fd-12f2-413b-b7b5-cbd5857586d6";
+  public static final String BRAND2_ID = "55f88058-7c11-4b34-af7c-eee23ee97e22";
+  public static final String BRAND3_ID = "add83dbb-ec7f-4853-b770-d59d394625ac";
+  public static final String BRAND4_ID = "7d53d7e4-3abf-43bf-83d4-78c3f2f92bde";
+  public static final String BRAND5_ID = "9b810916-b7c0-48b6-a9c9-e1905d82848f";
+
   public static final String PRODUCT1_ID = "116d9889-cc74-47da-b37b-3570ca4acb2b";
   public static final String PRODUCT2_ID = "a8eb7881-0ff8-4ce8-8565-7583d17081f9";
   public static final String PRODUCT3_ID = "43c92224-2a55-4ee8-bd83-31ac69c07c04";
