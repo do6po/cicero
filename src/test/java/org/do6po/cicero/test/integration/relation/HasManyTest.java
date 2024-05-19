@@ -13,6 +13,7 @@ import org.do6po.cicero.collection.ModelList;
 import org.do6po.cicero.test.integration.BaseDbTest;
 import org.do6po.cicero.test.integration.model.OrderM;
 import org.do6po.cicero.test.integration.model.UserM;
+import org.do6po.cicero.test.integration.model.UserM_;
 import org.do6po.cicero.test.integration.model.builder.UserQB;
 import org.junit.jupiter.api.Test;
 
@@ -53,7 +54,7 @@ class HasManyTest extends BaseDbTest {
 
     ModelList<UserM, UserQB> users =
         userQuery()
-            .with("orders")
+            .with(UserM_.Relations.orders)
             .whereKey(Set.of(USER1_ID, USER2_ID, USER3_ID))
             .get(ModelList::new);
 
