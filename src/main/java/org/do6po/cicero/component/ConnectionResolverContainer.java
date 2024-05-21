@@ -1,10 +1,13 @@
 package org.do6po.cicero.component;
 
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.do6po.cicero.configuration.ConnectionResolver;
 import org.do6po.cicero.configuration.DbDriver;
 import org.do6po.cicero.exception.BaseException;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ConnectionResolverContainer {
   private static ConnectionResolver resolver;
 
