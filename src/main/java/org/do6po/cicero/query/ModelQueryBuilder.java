@@ -17,6 +17,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.do6po.cicero.enums.OperatorEnum;
 import org.do6po.cicero.enums.PredicateOperatorEnum;
+import org.do6po.cicero.filter.ModelFilter;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.relation.Relation;
 import org.do6po.cicero.relation.RelationLoaderBuffer;
@@ -214,6 +215,12 @@ public abstract class ModelQueryBuilder<
   public <F extends BaseModel<F, Q>, Q extends ModelQueryBuilder<F, Q>, R> B withCount(
       Function<M, Relation<M, F, Q, R>> extractor) {
     return withCount(extractor, UnaryOperator.identity());
+  }
+
+  public B filter(ModelFilter<M, B> filter) {
+    filter.fill(self());
+
+    return self();
   }
 
   public Optional<M> find(Object identify) {
