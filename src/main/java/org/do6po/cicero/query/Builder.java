@@ -32,6 +32,8 @@ import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.enums.OperatorEnum;
 import org.do6po.cicero.enums.PredicateOperatorEnum;
 import org.do6po.cicero.enums.UnionTypeEnum;
+import org.do6po.cicero.exception.FetchResultException;
+import org.do6po.cicero.exception.PaginateException;
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.expression.from.FromExpression;
 import org.do6po.cicero.expression.from.QueryFromExpression;
@@ -310,7 +312,7 @@ public abstract class Builder<T, B extends Builder<T, B>>
 
       log.error(message, e);
 
-      throw new RuntimeException(message, e);
+      throw new FetchResultException(message, e);
     }
   }
 
@@ -355,7 +357,9 @@ public abstract class Builder<T, B extends Builder<T, B>>
 
       return new SimplePaginator<>(page, perPage, total, items);
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      String message = "Builder.paginate error!";
+      log.error(message, e);
+      throw new PaginateException(message, e);
     }
   }
 

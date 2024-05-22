@@ -5,6 +5,7 @@ import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.do6po.cicero.binding.BindingNormalizer;
+import org.do6po.cicero.binding.BindingNormalizerContainer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BindingNormalizeUtil {
@@ -20,16 +21,16 @@ public class BindingNormalizeUtil {
       return normalizers;
     }
 
-    return List.of();
+    normalizers = BindingNormalizerContainer.getNormalizers();
+
+    return normalizers;
   }
 
   private static Object normalizeBindings(Object binding) {
-    if (binding instanceof Enum<?> value) {
-      return value.name();
-    }
-
-    if (binding instanceof Class<?> bClass) {
-      return bClass.getCanonicalName();
+    for (BindingNormalizer normalizer : getNormalizers()) {
+      if (normalizer.canNormalize(binding)) {
+        return normalizer.normalize(binding);
+      }
     }
 
     return binding;
