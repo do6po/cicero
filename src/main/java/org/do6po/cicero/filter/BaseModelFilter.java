@@ -1,9 +1,5 @@
 package org.do6po.cicero.filter;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -13,24 +9,23 @@ import java.util.Map;
 import java.util.Objects;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.do6po.cicero.annotation.FilterMethod;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.query.ModelQueryBuilder;
 
 @Slf4j
+@Getter
 public abstract class BaseModelFilter<M extends BaseModel<M, B>, B extends ModelQueryBuilder<M, B>>
     implements ModelFilter<M, B> {
 
-  @Getter protected B builder;
-
+  protected B builder;
   protected Map<String, Object> filterData = new HashMap<>();
-  protected Map<String, Object> orderData = new HashMap<>();
 
   @Override
   public void fill(B builder) {
     this.builder = builder;
 
     applyFilterMethods();
-    applyOrderMethods();
   }
 
   public BaseModelFilter<M, B> putFilterObject(Object value) {
@@ -44,21 +39,6 @@ public abstract class BaseModelFilter<M extends BaseModel<M, B>, B extends Model
       }
     }
 
-    return this;
-  }
-
-  public BaseModelFilter<M, B> clearFilterObject(Object value) {
-    filterData.clear();
-    return this;
-  }
-
-  public BaseModelFilter<M, B> putOrderObject(Object value) {
-
-    return this;
-  }
-
-  public BaseModelFilter<M, B> clearOrderObject(Object value) {
-    orderData.clear();
     return this;
   }
 
@@ -90,23 +70,5 @@ public abstract class BaseModelFilter<M extends BaseModel<M, B>, B extends Model
         }
       }
     }
-  }
-
-  protected void applyOrderMethods() {}
-
-  @Target(ElementType.METHOD)
-  @Retention(RetentionPolicy.RUNTIME)
-  public @interface FilterMethod {
-    String name() default "";
-
-    int order() default 0;
-  }
-
-  @Target(ElementType.METHOD)
-  @Retention(RetentionPolicy.RUNTIME)
-  public @interface OrderMethod {
-    String name() default "";
-
-    int order() default 0;
   }
 }
