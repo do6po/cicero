@@ -10,6 +10,7 @@ import static org.do6po.cicero.utils.ClassUtil.getInstance;
 import static org.do6po.cicero.utils.DotUtil.dot;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -131,7 +132,7 @@ public class ManyToMany<
     for (M model : models) {
       model.setRelation(
           getRelationName(),
-          groupByLocalKey.get(model.getAttribute(localAttribute)).stream()
+          groupByLocalKey.getOrDefault(model.getAttribute(localAttribute), new HashSet<>()).stream()
               .map(foreignModelsMap::get)
               .collect(toList()));
     }

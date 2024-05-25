@@ -2,6 +2,8 @@ package org.do6po.cicero.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.Collection;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -43,5 +45,13 @@ public class RelationUtil {
 
       throw new ExtractRelationException(message, e);
     }
+  }
+
+  public static <M extends BaseModel<M, ?>> Collection<String> extractRelationMethodNames(
+      M currentModel) {
+    return Arrays.stream(currentModel.getClass().getDeclaredMethods())
+        .filter(m -> m.getReturnType().equals(Relation.class))
+        .map(Method::getName)
+        .toList();
   }
 }

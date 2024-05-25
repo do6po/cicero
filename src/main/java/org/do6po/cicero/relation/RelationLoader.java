@@ -7,15 +7,17 @@ import java.util.Map.Entry;
 import java.util.Set;
 import lombok.NonNull;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import org.do6po.cicero.graph.GraphNode;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.query.ModelQueryBuilder;
 import org.do6po.cicero.utils.RelationUtil;
 
 @Setter
+@Accessors(fluent = true, chain = true)
 public class RelationLoader {
 
-  private boolean nullify = false;
+  private boolean nullifyEmptyRelations = false;
 
   public <M extends BaseModel<M, B>, B extends ModelQueryBuilder<M, B>> void load(
       @NonNull Collection<M> models, @NonNull Set<String> chains) {
@@ -30,6 +32,10 @@ public class RelationLoader {
       @NonNull Collection<M> models, @NonNull GraphNode graphNode) {
     Map<String, GraphNode> graph = graphNode.getGraph();
 
+    if (nullifyEmptyRelations) {
+      nullifyRelations(models);
+    }
+
     if (graph.isEmpty()) {
       return;
     }
@@ -38,6 +44,20 @@ public class RelationLoader {
 
     for (Entry<String, GraphNode> branch : graph.entrySet()) {
       load(models, branch, currentModel);
+    }
+  }
+
+  private <M extends BaseModel<M, B>, B extends ModelQueryBuilder<M, B>> void nullifyRelations(
+      Collection<M> models) {
+    M currentModel = models.stream().findFirst().orElseThrow();
+    Collection<String> relations = RelationUtil.extractRelationMethodNames(currentModel);
+
+    for (M model : models) {
+      for (String relation : relations) {
+        if (!model.hasRelation(relation)) {
+          model.setRelation(relation, null);
+        }
+      }
     }
   }
 

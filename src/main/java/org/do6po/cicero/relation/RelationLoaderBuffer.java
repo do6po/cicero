@@ -16,9 +16,9 @@ public interface RelationLoaderBuffer<
 
   B with(String... relations);
 
-  B withNullify();
+  B nullifyRelations();
 
-  B withoutNullify();
+  B withoutNullifyRelations();
 
   <F extends BaseModel<F, Q>, Q extends ModelQueryBuilder<F, Q>, R> B with(
       Function<M, Relation<M, F, Q, R>> extractor);

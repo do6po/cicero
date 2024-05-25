@@ -35,7 +35,7 @@ public abstract class ModelQueryBuilder<
   protected final M model;
 
   protected Set<String> with = new HashSet<>();
-  protected boolean withNullify = false;
+  protected boolean nullifyRelations = false;
 
   protected ModelQueryBuilder(Class<M> modelClass) {
     this.modelClass = modelClass;
@@ -75,16 +75,14 @@ public abstract class ModelQueryBuilder<
     return self();
   }
 
-  @Override
-  public B withNullify() {
-    withNullify = true;
+  public B nullifyRelations() {
+    nullifyRelations = true;
 
     return self();
   }
 
-  @Override
-  public B withoutNullify() {
-    withNullify = false;
+  public B withoutNullifyRelations() {
+    nullifyRelations = false;
 
     return self();
   }
@@ -255,9 +253,7 @@ public abstract class ModelQueryBuilder<
   public List<M> get() {
     List<M> result = super.get();
 
-    RelationLoader relationLoader = new RelationLoader();
-    relationLoader.setNullify(withNullify);
-    relationLoader.load(result, with);
+    new RelationLoader().nullifyEmptyRelations(nullifyRelations).load(result, with);
 
     return result;
   }
