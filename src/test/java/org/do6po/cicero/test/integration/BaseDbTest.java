@@ -29,6 +29,8 @@ public abstract class BaseDbTest {
 
   public static final String CONNECTION_NAME_DEFAULT = "default";
 
+  public static final String DEFAULT_SQL_EXECUTOR = "defaultSqlExecutor";
+
   public static final String USER1_ID = "4fbcfc50-7dda-4c1c-b358-30e70cb8b6d8";
   public static final String USER2_ID = "2249fa0d-766d-41e5-9b7a-2ca0961d1ab6";
   public static final String USER3_ID = "84409556-a609-4375-b5b6-44678009d193";
