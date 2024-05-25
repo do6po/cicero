@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.query.ModelQueryBuilder;
-import org.do6po.cicero.utils.RelationUtil;
+import org.do6po.cicero.relation.RelationLoader;
 
 public class ModelList<M extends BaseModel<M, B>, B extends ModelQueryBuilder<M, B>>
     extends ArrayList<M> {
@@ -54,7 +54,7 @@ public class ModelList<M extends BaseModel<M, B>, B extends ModelQueryBuilder<M,
   }
 
   public ModelList<M, B> load(Set<String> relations) {
-    RelationUtil.load(this, relations);
+    new RelationLoader().load(this, relations);
 
     return this;
   }

@@ -17,7 +17,7 @@ import org.do6po.cicero.test.integration.model.UserM_;
 import org.do6po.cicero.test.integration.model.builder.UserQB;
 import org.junit.jupiter.api.Test;
 
-@SqlExecutorGetter("defaultSqlExecutor")
+@SqlExecutorGetter(BaseDbTest.DEFAULT_SQL_EXECUTOR)
 @DbChangeOnce(
     sqlQueryFiles = {
       "sql/users__up.sql",

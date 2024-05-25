@@ -13,12 +13,12 @@ import org.do6po.cicero.query.PlainWriteBuilder;
 import org.do6po.cicero.test.integration.BaseDbTest;
 import org.junit.jupiter.api.Test;
 
-@SqlExecutorGetter("defaultSqlExecutor")
+@SqlExecutorGetter(BaseDbTest.DEFAULT_SQL_EXECUTOR)
 @DbChangeOnce(sqlQueryFiles = "sql/users__up.sql")
 @DbChangeOnce(
     sqlQueryFiles = "sql/users__down.sql",
     executionPhase = DbChangeOnce.ExecutionPhase.AFTER_ALL)
-public class PlainWriteBuilderTest extends BaseDbTest {
+class PlainWriteBuilderTest extends BaseDbTest {
 
   @Test
   void insert() {

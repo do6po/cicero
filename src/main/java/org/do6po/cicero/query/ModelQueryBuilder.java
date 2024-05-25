@@ -17,11 +17,12 @@ import lombok.Getter;
 import lombok.NonNull;
 import org.do6po.cicero.enums.OperatorEnum;
 import org.do6po.cicero.enums.PredicateOperatorEnum;
+import org.do6po.cicero.filter.ModelFilter;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.relation.Relation;
+import org.do6po.cicero.relation.RelationLoader;
 import org.do6po.cicero.relation.RelationLoaderBuffer;
 import org.do6po.cicero.utils.ClassUtil;
-import org.do6po.cicero.utils.RelationUtil;
 import org.do6po.cicero.utils.RowMapper;
 import org.do6po.cicero.utils.StringUtil;
 
@@ -34,6 +35,7 @@ public abstract class ModelQueryBuilder<
   protected final M model;
 
   protected Set<String> with = new HashSet<>();
+  protected boolean nullifyRelations = false;
 
   protected ModelQueryBuilder(Class<M> modelClass) {
     this.modelClass = modelClass;
@@ -69,6 +71,18 @@ public abstract class ModelQueryBuilder<
 
   public B whereKey(Collection<Object> identify) {
     getModel().getModelKey().whereKeys(self(), identify);
+
+    return self();
+  }
+
+  public B nullifyRelations() {
+    nullifyRelations = true;
+
+    return self();
+  }
+
+  public B withoutNullifyRelations() {
+    nullifyRelations = false;
 
     return self();
   }
@@ -216,6 +230,12 @@ public abstract class ModelQueryBuilder<
     return withCount(extractor, UnaryOperator.identity());
   }
 
+  public B filter(ModelFilter<M, B> filter) {
+    filter.fill(self());
+
+    return self();
+  }
+
   public Optional<M> find(Object identify) {
     return whereKey(identify).first();
   }
@@ -233,7 +253,7 @@ public abstract class ModelQueryBuilder<
   public List<M> get() {
     List<M> result = super.get();
 
-    RelationUtil.load(result, with);
+    new RelationLoader().nullifyEmptyRelations(nullifyRelations).load(result, with);
 
     return result;
   }

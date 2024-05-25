@@ -13,7 +13,7 @@ import org.do6po.cicero.test.integration.BaseDbTest;
 import org.do6po.cicero.test.integration.model.UserM;
 import org.junit.jupiter.api.Test;
 
-@SqlExecutorGetter("defaultSqlExecutor")
+@SqlExecutorGetter(BaseDbTest.DEFAULT_SQL_EXECUTOR)
 @DbChangeOnce(sqlQueryFiles = "sql/users__up.sql")
 @DbChangeOnce(sqlQueryFiles = "sql/users__down.sql", executionPhase = ExecutionPhase.AFTER_ALL)
 class ModelQueryBuilderTest extends BaseDbTest {

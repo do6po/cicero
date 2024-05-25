@@ -127,6 +127,10 @@ public interface CriteriaBuilder<B extends CriteriaBuilder<B>> {
     return whereRaw(raw, bindings, OperatorEnum.OR);
   }
 
+  default B whereIn(String column, List<String> values) {
+    return whereIn(column, values.stream().map(i -> (Object) i).toList());
+  }
+
   default B whereIn(String column, Collection<Object> values) {
     return where(
         new SimplePredicateExpression(column, PredicateOperatorEnum.IN.getValue(), values));

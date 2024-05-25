@@ -16,7 +16,7 @@ import org.do6po.cicero.test.integration.model.ProductM;
 import org.do6po.cicero.test.integration.model.builder.ProductQB;
 import org.junit.jupiter.api.Test;
 
-@SqlExecutorGetter("defaultSqlExecutor")
+@SqlExecutorGetter(BaseDbTest.DEFAULT_SQL_EXECUTOR)
 @DbChangeOnce(sqlQueryFiles = {"sql/products__up.sql"})
 @DbChangeOnce(
     sqlQueryFiles = {"sql/products__down.sql"},

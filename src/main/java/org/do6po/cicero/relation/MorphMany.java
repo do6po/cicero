@@ -3,6 +3,7 @@ package org.do6po.cicero.relation;
 import static java.util.stream.Collectors.toSet;
 import static org.do6po.cicero.utils.DotUtil.dot;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,9 @@ public class MorphMany<
             .collect(Collectors.groupingBy(i -> i.getAttribute(foreignReferenceIdAttribute)));
 
     for (M model : models) {
-      model.setRelation(getRelationName(), map.get(model.getAttribute(localAttribute)));
+      model.setRelation(
+          getRelationName(),
+          map.getOrDefault(model.getAttribute(localAttribute), new ArrayList<>()));
     }
 
     return foreignModels;
