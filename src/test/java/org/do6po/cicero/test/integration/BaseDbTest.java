@@ -91,10 +91,11 @@ public abstract class BaseDbTest {
     queryCounter = new CiceroQueryCounter();
     sqlExecutor = new DefaultSqlExecutor(dataSource);
 
-    ConnectionResolver resolver = new ConnectionResolver();
-    resolver.put(
-        CONNECTION_NAME_DEFAULT, new CiceroConnection(dataSource, Driver.class, queryCounter));
-    ConnectionResolverContainer.put(resolver);
+    ConnectionResolverContainer.put(
+        new ConnectionResolver()
+            .put(
+                CONNECTION_NAME_DEFAULT,
+                new CiceroConnection(dataSource, Driver.class, queryCounter)));
   }
 
   protected static UserQB userQuery() {

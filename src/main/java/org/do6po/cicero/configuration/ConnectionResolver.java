@@ -11,13 +11,15 @@ public class ConnectionResolver {
 
   private final Map<String, DbDriver> connections = new HashMap<>();
 
-  public void put(String name, DbDriver connection) {
+  public ConnectionResolver put(String name, DbDriver connection) {
     if (connections.containsKey(name)) {
       throw new CiceroConnectionException(
           "Connection with name '%s' already exists!".formatted(name));
     }
 
     connections.put(name, connection);
+
+    return this;
   }
 
   public DbDriver get(@NonNull String name) {
