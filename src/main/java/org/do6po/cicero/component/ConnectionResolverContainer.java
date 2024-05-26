@@ -27,7 +27,7 @@ public class ConnectionResolverContainer {
     return Objects.nonNull(resolver);
   }
 
-  public static DbDriver getConnection(String name) {
-    return get().getConnection(name);
+  public static DbDriver get(String name) {
+    return get().get(name);
   }
 }

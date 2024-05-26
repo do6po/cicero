@@ -20,26 +20,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-public class CiceroConnectionDelegate implements Connection, ConnectionInterceptor {
+public class CiceroConnectionDelegate implements Connection {
 
   private final Connection delegate;
+  private final QueryCounter queryCounter;
 
-  private transient ThreadLocal<Long> threadQueryCount = new ThreadLocal<>();
-
-  public CiceroConnectionDelegate(Connection delegate) {
+  public CiceroConnectionDelegate(Connection delegate, QueryCounter queryCounter) {
     this.delegate = delegate;
-  }
-
-  public void startQueryCount() {
-    threadQueryCount.set(0L);
-  }
-
-  public void stopQueryCount() {
-    threadQueryCount.remove();
-  }
-
-  public Long getQueryCount() {
-    return threadQueryCount.get();
+    this.queryCounter = queryCounter;
   }
 
   @Override
@@ -49,10 +37,7 @@ public class CiceroConnectionDelegate implements Connection, ConnectionIntercept
 
   @Override
   public PreparedStatement prepareStatement(String s) throws SQLException {
-    Long count = threadQueryCount.get();
-    if (count != null) {
-      threadQueryCount.set(count + 1);
-    }
+    queryCounter.tryIncrement();
 
     return delegate.prepareStatement(s);
   }

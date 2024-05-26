@@ -277,43 +277,47 @@ public abstract class Builder<T, B extends Builder<T, B>>
     String bindingAsString =
         bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
 
-    try {
-      DbDriver dbDriver = getDbDriver();
-      PreparedStatement preparedStatement =
-          dbDriver.getConnection().prepareStatement(sqlExpression);
+    return getDbDriver()
+        .execute(
+            conn -> {
+              try {
 
-      int i = 1;
+                PreparedStatement preparedStatement = conn.prepareStatement(sqlExpression);
 
-      for (Object binding : bindings) {
-        preparedStatement.setObject(i++, BindingNormalizeUtil.normalize(binding));
-      }
+                int i = 1;
 
-      ResultSet resultSet = preparedStatement.executeQuery();
+                for (Object binding : bindings) {
+                  preparedStatement.setObject(i++, BindingNormalizeUtil.normalize(binding));
+                }
 
-      log.debug(
-          """
-          Builder.fetchResultSet:
-          Query: '%s'.
-          Bindings: '%s'
-          """
-              .formatted(sqlExpression, bindings));
+                ResultSet resultSet = preparedStatement.executeQuery();
 
-      return function.apply(resultSet);
-    } catch (SQLException e) {
-      String message =
-          """
-          Builder.fetchResultSet error:
-          %s
-          Sql state: '%s'.
-          Query: '%s'.
-          Bindings: (%s).
-          """
-              .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
+                log.debug(
+                    """
+                    Builder.fetchResultSet:
+                    Query: '%s'.
+                    Bindings: '%s'
+                    """
+                        .formatted(sqlExpression, bindings));
 
-      log.error(message, e);
+                return function.apply(resultSet);
 
-      throw new FetchResultException(message, e);
-    }
+              } catch (SQLException e) {
+                String message =
+                    """
+                    Builder.fetchResultSet error:
+                    %s
+                    Sql state: '%s'.
+                    Query: '%s'.
+                    Bindings: (%s).
+                    """
+                        .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
+
+                log.error(message, e);
+
+                throw new FetchResultException(message, e);
+              }
+            });
   }
 
   protected List<T> mapList(ResultSet resultSet) {
@@ -411,7 +415,7 @@ public abstract class Builder<T, B extends Builder<T, B>>
   }
 
   public DbDriver getDbDriver() {
-    return ConnectionResolverContainer.getConnection(connection);
+    return ConnectionResolverContainer.get(connection);
   }
 
   public B limit(Integer i) {

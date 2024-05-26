@@ -49,7 +49,7 @@ class QueryBuilderTest {
 
     ConnectionResolverContainer.put(resolver);
 
-    when(resolver.getConnection(anyString())).thenReturn(dbDriver);
+    when(resolver.get(anyString())).thenReturn(dbDriver);
     when(dbDriver.getGrammar()).thenReturn(grammar);
     when(grammar.getQueryCollector()).thenReturn(pgsqlQueryCollector);
   }
