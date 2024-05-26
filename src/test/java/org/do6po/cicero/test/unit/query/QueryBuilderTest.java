@@ -10,9 +10,9 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.List;
-import org.do6po.cicero.component.ConnectionResolverContainer;
-import org.do6po.cicero.configuration.ConnectionResolver;
+import org.do6po.cicero.component.DbDriverResolverContainer;
 import org.do6po.cicero.configuration.DbDriver;
+import org.do6po.cicero.configuration.DbDriverResolver;
 import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.expression.join.JoinExpression.JoinTypeEnum;
@@ -22,7 +22,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class QueryBuilderTest {
-  private static final ConnectionResolver resolver = mock(ConnectionResolver.class);
+  private static final DbDriverResolver resolver = mock(DbDriverResolver.class);
   private static final DbDriver dbDriver = mock(DbDriver.class);
   private static final Grammar grammar = mock(Grammar.class);
   private static final PgsqlQueryCollector pgsqlQueryCollector = new PgsqlQueryCollector();
@@ -43,11 +43,11 @@ class QueryBuilderTest {
 
   @BeforeAll
   static void setUp() {
-    if (ConnectionResolverContainer.has()) {
+    if (DbDriverResolverContainer.has()) {
       return;
     }
 
-    ConnectionResolverContainer.put(resolver);
+    DbDriverResolverContainer.put(resolver);
 
     when(resolver.get(anyString())).thenReturn(dbDriver);
     when(dbDriver.getGrammar()).thenReturn(grammar);

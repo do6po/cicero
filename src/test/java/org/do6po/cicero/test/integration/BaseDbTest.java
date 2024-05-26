@@ -10,9 +10,9 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import java.util.Objects;
 import javax.sql.DataSource;
-import org.do6po.cicero.component.ConnectionResolverContainer;
+import org.do6po.cicero.component.DbDriverResolverContainer;
 import org.do6po.cicero.configuration.CiceroConnection;
-import org.do6po.cicero.configuration.ConnectionResolver;
+import org.do6po.cicero.configuration.DbDriverResolver;
 import org.do6po.cicero.interceptor.CiceroQueryCounter;
 import org.do6po.cicero.interceptor.QueryCounter;
 import org.do6po.cicero.test.integration.model.BrandM;
@@ -77,7 +77,7 @@ public abstract class BaseDbTest {
 
   @BeforeAll
   static void setUpConnection() {
-    if (ConnectionResolverContainer.has()) {
+    if (DbDriverResolverContainer.has()) {
       return;
     }
 
@@ -91,8 +91,8 @@ public abstract class BaseDbTest {
     queryCounter = new CiceroQueryCounter();
     sqlExecutor = new DefaultSqlExecutor(dataSource);
 
-    ConnectionResolverContainer.put(
-        new ConnectionResolver()
+    DbDriverResolverContainer.put(
+        new DbDriverResolver()
             .put(
                 CONNECTION_NAME_DEFAULT,
                 new CiceroConnection(dataSource, Driver.class, queryCounter)));

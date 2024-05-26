@@ -3,6 +3,7 @@ package org.do6po.cicero.query;
 import static org.do6po.cicero.utils.ClassUtil.getInstance;
 import static org.do6po.cicero.utils.ClassUtil.guessType;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -26,7 +27,7 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.do6po.cicero.component.ConnectionResolverContainer;
+import org.do6po.cicero.component.DbDriverResolverContainer;
 import org.do6po.cicero.configuration.DbDriver;
 import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.enums.OperatorEnum;
@@ -271,53 +272,51 @@ public abstract class Builder<T, B extends Builder<T, B>>
   }
 
   public <R> R fetchResultSet(Function<ResultSet, R> function) {
+    return getDbDriver().execute(c -> fetchResultSet(c, function));
+  }
+
+  protected <R> R fetchResultSet(Connection connection, Function<ResultSet, R> function) {
     SqlExpression expression = getSqlExpression();
     String sqlExpression = expression.getExpression();
     Collection<Object> bindings = expression.getBindings();
     String bindingAsString =
         bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
 
-    return getDbDriver()
-        .execute(
-            conn -> {
-              try {
+    try {
+      PreparedStatement preparedStatement = connection.prepareStatement(sqlExpression);
 
-                PreparedStatement preparedStatement = conn.prepareStatement(sqlExpression);
+      int i = 1;
 
-                int i = 1;
+      for (Object binding : bindings) {
+        preparedStatement.setObject(i++, BindingNormalizeUtil.normalize(binding));
+      }
 
-                for (Object binding : bindings) {
-                  preparedStatement.setObject(i++, BindingNormalizeUtil.normalize(binding));
-                }
+      ResultSet resultSet = preparedStatement.executeQuery();
 
-                ResultSet resultSet = preparedStatement.executeQuery();
+      log.debug(
+          """
+          Builder.fetchResultSet:
+          Query: '%s'.
+          Bindings: '%s'
+          """
+              .formatted(sqlExpression, bindings));
 
-                log.debug(
-                    """
-                    Builder.fetchResultSet:
-                    Query: '%s'.
-                    Bindings: '%s'
-                    """
-                        .formatted(sqlExpression, bindings));
+      return function.apply(resultSet);
+    } catch (SQLException e) {
+      String message =
+          """
+          Builder.fetchResultSet error:
+          %s
+          Sql state: '%s'.
+          Query: '%s'.
+          Bindings: (%s).
+          """
+              .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
 
-                return function.apply(resultSet);
+      log.error(message, e);
 
-              } catch (SQLException e) {
-                String message =
-                    """
-                    Builder.fetchResultSet error:
-                    %s
-                    Sql state: '%s'.
-                    Query: '%s'.
-                    Bindings: (%s).
-                    """
-                        .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
-
-                log.error(message, e);
-
-                throw new FetchResultException(message, e);
-              }
-            });
+      throw new FetchResultException(message, e);
+    }
   }
 
   protected List<T> mapList(ResultSet resultSet) {
@@ -415,7 +414,7 @@ public abstract class Builder<T, B extends Builder<T, B>>
   }
 
   public DbDriver getDbDriver() {
-    return ConnectionResolverContainer.get(connection);
+    return DbDriverResolverContainer.get(connection);
   }
 
   public B limit(Integer i) {
@@ -486,9 +485,5 @@ public abstract class Builder<T, B extends Builder<T, B>>
 
   public boolean doesNotExists() {
     return !exists();
-  }
-
-  public interface ResultSetExecutor<V, R> {
-    R execute(V value) throws SQLException;
   }
 }

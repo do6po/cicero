@@ -7,13 +7,12 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.do6po.cicero.exception.BaseException;
+import org.do6po.cicero.exception.CiceroConnectionException;
 import org.do6po.cicero.expression.Expression;
 import org.do6po.cicero.query.grammar.Grammar;
 
 public interface DbDriver {
   Connection getConnection() throws SQLException;
-
-  <T> T execute(Function<Connection, T> function);
 
   Grammar getGrammar();
 
@@ -22,35 +21,44 @@ public interface DbDriver {
   }
 
   default int executeWriteQuery(Expression expression) {
+    return execute(conn -> executeWriteQuery(conn, expression));
+  }
+
+  default int executeWriteQuery(Connection connection, Expression expression) {
     String sqlExpression = expression.getExpression();
     Collection<Object> bindings = expression.getBindings();
     String bindingAsString =
         bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
+    try {
+      PreparedStatement preparedStatement = connection.prepareStatement(sqlExpression);
 
-    return execute(
-        conn -> {
-          try {
-            PreparedStatement preparedStatement = conn.prepareStatement(sqlExpression);
+      int i = 0;
 
-            int i = 0;
+      for (Object binding : bindings) {
+        preparedStatement.setObject(++i, binding);
+      }
 
-            for (Object binding : bindings) {
-              preparedStatement.setObject(++i, binding);
-            }
+      return preparedStatement.executeUpdate();
+    } catch (SQLException e) {
+      String message =
+          """
+          Builder.executeQuery error:
+          %s
+          Sql state: '%s'.
+          Query: '%s'.
+          Bindings: (%s).
+          """
+              .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
+      throw new BaseException(message, e);
+    }
+  }
 
-            return preparedStatement.executeUpdate();
-          } catch (SQLException e) {
-            String message =
-                """
-                Builder.executeQuery error:
-                %s
-                Sql state: '%s'.
-                Query: '%s'.
-                Bindings: (%s).
-                """
-                    .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
-            throw new BaseException(message, e);
-          }
-        });
+  default <T> T execute(Function<Connection, T> function) {
+    try (Connection connection = getConnection()) {
+      return function.apply(connection);
+    } catch (SQLException e) {
+      String message = "Connection failed!";
+      throw new CiceroConnectionException(message, e);
+    }
   }
 }
