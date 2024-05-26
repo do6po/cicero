@@ -6,14 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.darrmirr.dbchange.DbChangeExtension;
 import com.github.darrmirr.dbchange.sql.executor.DefaultSqlExecutor;
 import com.github.darrmirr.dbchange.sql.executor.SqlExecutor;
-import java.util.Map;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import java.util.Objects;
+import javax.sql.DataSource;
 import org.do6po.cicero.component.ConnectionResolverContainer;
+import org.do6po.cicero.configuration.CiceroConnection;
 import org.do6po.cicero.configuration.ConnectionResolver;
-import org.do6po.cicero.configuration.DbConfig;
-import org.do6po.cicero.configuration.DbDriver;
-import org.do6po.cicero.configuration.SqlDriverEnum;
-import org.do6po.cicero.interceptor.ConnectionInterceptor;
+import org.do6po.cicero.interceptor.CiceroQueryCounter;
+import org.do6po.cicero.interceptor.QueryCounter;
 import org.do6po.cicero.test.integration.model.BrandM;
 import org.do6po.cicero.test.integration.model.ProductM;
 import org.do6po.cicero.test.integration.model.UserM;
@@ -23,6 +24,7 @@ import org.do6po.cicero.test.integration.model.builder.UserQB;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.postgresql.Driver;
 
 @ExtendWith(DbChangeExtension.class)
 public abstract class BaseDbTest {
@@ -71,32 +73,29 @@ public abstract class BaseDbTest {
   public static final String CATEGORY4_ID = "b1771a71-e956-4b13-a89b-eaa0be296866";
 
   protected static SqlExecutor sqlExecutor;
-  protected static ConnectionInterceptor interceptor;
-
-  protected static DbConfig getDbConfig() {
-    return DbConfig.builder()
-        .driver(SqlDriverEnum.POSTGRESQL)
-        .database("cicero")
-        .hostname("localhost")
-        .port(25432)
-        .username("root")
-        .password("password")
-        .build();
-  }
+  protected static QueryCounter queryCounter;
 
   @BeforeAll
-  static void configConnection() {
-    if (!ConnectionResolverContainer.has()) {
-      ConnectionResolverContainer.put(
-          new ConnectionResolver(Map.of(CONNECTION_NAME_DEFAULT, getDbConfig())));
+  static void setUpConnection() {
+    if (ConnectionResolverContainer.has()) {
+      return;
     }
 
-    ConnectionResolver resolver = ConnectionResolverContainer.get();
+    HikariConfig c = new HikariConfig();
+    c.setJdbcUrl("jdbc:postgresql://localhost:25432/cicero");
+    c.setUsername("root");
+    c.setPassword("password");
 
-    DbDriver connection = resolver.getConnection(CONNECTION_NAME_DEFAULT);
+    DataSource dataSource = new HikariDataSource(c);
 
-    sqlExecutor = new DefaultSqlExecutor(connection.getDataSource());
-    interceptor = connection.getInterceptor();
+    queryCounter = new CiceroQueryCounter();
+    sqlExecutor = new DefaultSqlExecutor(dataSource);
+
+    ConnectionResolverContainer.put(
+        new ConnectionResolver()
+            .put(
+                CONNECTION_NAME_DEFAULT,
+                new CiceroConnection(dataSource, Driver.class, queryCounter)));
   }
 
   protected static UserQB userQuery() {
@@ -117,15 +116,15 @@ public abstract class BaseDbTest {
   }
 
   protected void startQueryCount() {
-    interceptor.startQueryCount();
+    queryCounter.start();
   }
 
   protected Long getQueryCount() {
-    return interceptor.getQueryCount();
+    return queryCounter.get();
   }
 
   protected void stopQueryCount() {
-    interceptor.stopQueryCount();
+    queryCounter.stop();
   }
 
   protected void assertQueryCount(Integer count) {

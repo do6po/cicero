@@ -6,18 +6,14 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.sql.DataSource;
 import org.do6po.cicero.exception.BaseException;
 import org.do6po.cicero.expression.Expression;
-import org.do6po.cicero.interceptor.ConnectionInterceptor;
 import org.do6po.cicero.query.grammar.Grammar;
 
 public interface DbDriver {
-  DataSource getDataSource();
+  Connection getConnection() throws SQLException;
 
-  Connection getConnection();
-
-  ConnectionInterceptor getInterceptor();
+  <T> T execute(Function<Connection, T> function);
 
   Grammar getGrammar();
 
@@ -31,27 +27,30 @@ public interface DbDriver {
     String bindingAsString =
         bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
 
-    try {
-      PreparedStatement preparedStatement = getConnection().prepareStatement(sqlExpression);
+    return execute(
+        conn -> {
+          try {
+            PreparedStatement preparedStatement = conn.prepareStatement(sqlExpression);
 
-      int i = 0;
+            int i = 0;
 
-      for (Object binding : bindings) {
-        preparedStatement.setObject(++i, binding);
-      }
+            for (Object binding : bindings) {
+              preparedStatement.setObject(++i, binding);
+            }
 
-      return preparedStatement.executeUpdate();
-    } catch (SQLException e) {
-      String message =
-          """
-          Builder.executeQuery error:
-          %s
-          Sql state: '%s'.
-          Query: '%s'.
-          Bindings: (%s).
-          """
-              .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
-      throw new BaseException(message, e);
-    }
+            return preparedStatement.executeUpdate();
+          } catch (SQLException e) {
+            String message =
+                """
+                Builder.executeQuery error:
+                %s
+                Sql state: '%s'.
+                Query: '%s'.
+                Bindings: (%s).
+                """
+                    .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
+            throw new BaseException(message, e);
+          }
+        });
   }
 }
