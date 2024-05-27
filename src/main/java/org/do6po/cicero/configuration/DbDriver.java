@@ -27,8 +27,6 @@ public interface DbDriver {
   default int executeWriteQuery(Connection connection, Expression expression) {
     String sqlExpression = expression.getExpression();
     Collection<Object> bindings = expression.getBindings();
-    String bindingAsString =
-        bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
     try {
       PreparedStatement preparedStatement = connection.prepareStatement(sqlExpression);
 
@@ -48,7 +46,11 @@ public interface DbDriver {
           Query: '%s'.
           Bindings: (%s).
           """
-              .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
+              .formatted(
+                  e.getMessage(),
+                  e.getSQLState(),
+                  sqlExpression,
+                  bindings.stream().map(String::valueOf).collect(Collectors.joining(", ")));
       throw new BaseException(message, e);
     }
   }

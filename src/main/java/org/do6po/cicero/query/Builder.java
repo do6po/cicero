@@ -3,17 +3,13 @@ package org.do6po.cicero.query;
 import static org.do6po.cicero.utils.ClassUtil.getInstance;
 import static org.do6po.cicero.utils.ClassUtil.guessType;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -22,9 +18,7 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.do6po.cicero.component.DbDriverResolverContainer;
@@ -33,7 +27,6 @@ import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.enums.OperatorEnum;
 import org.do6po.cicero.enums.PredicateOperatorEnum;
 import org.do6po.cicero.enums.UnionTypeEnum;
-import org.do6po.cicero.exception.FetchResultException;
 import org.do6po.cicero.exception.PaginateException;
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.expression.from.FromExpression;
@@ -57,10 +50,11 @@ import org.do6po.cicero.expression.select.SubSelectExpression;
 import org.do6po.cicero.expression.subquery.QueryExpression;
 import org.do6po.cicero.expression.union.QueryUnionExpression;
 import org.do6po.cicero.expression.union.UnionExpression;
-import org.do6po.cicero.iterator.ResultSetChunkIterator;
+import org.do6po.cicero.iterator.ChunkIterator;
+import org.do6po.cicero.iterator.PlantChunkIterator;
 import org.do6po.cicero.pagination.Paginator;
 import org.do6po.cicero.pagination.SimplePaginator;
-import org.do6po.cicero.utils.BindingNormalizeUtil;
+import org.do6po.cicero.utils.ResultSetUtil;
 
 @Slf4j
 public abstract class Builder<T, B extends Builder<T, B>>
@@ -268,76 +262,14 @@ public abstract class Builder<T, B extends Builder<T, B>>
   }
 
   public List<T> get() {
-    return fetchResultSet(this::mapList);
+    return fetchResultSet(rs -> ResultSetUtil.mapList(rs, this::mapItem, null));
   }
 
   public <R> R fetchResultSet(Function<ResultSet, R> function) {
-    return getDbDriver().execute(c -> fetchResultSet(c, function));
+    return getDbDriver().execute(c -> ResultSetUtil.fetchAndMap(c, getSqlExpression(), function));
   }
 
-  protected <R> R fetchResultSet(Connection connection, Function<ResultSet, R> function) {
-    SqlExpression expression = getSqlExpression();
-    String sqlExpression = expression.getExpression();
-    Collection<Object> bindings = expression.getBindings();
-    String bindingAsString =
-        bindings.stream().map(String::valueOf).collect(Collectors.joining(", "));
-
-    try {
-      PreparedStatement preparedStatement = connection.prepareStatement(sqlExpression);
-
-      int i = 1;
-
-      for (Object binding : bindings) {
-        preparedStatement.setObject(i++, BindingNormalizeUtil.normalize(binding));
-      }
-
-      ResultSet resultSet = preparedStatement.executeQuery();
-
-      log.debug(
-          """
-          Builder.fetchResultSet:
-          Query: '%s'.
-          Bindings: '%s'
-          """
-              .formatted(sqlExpression, bindings));
-
-      return function.apply(resultSet);
-    } catch (SQLException e) {
-      String message =
-          """
-          Builder.fetchResultSet error:
-          %s
-          Sql state: '%s'.
-          Query: '%s'.
-          Bindings: (%s).
-          """
-              .formatted(e.getMessage(), e.getSQLState(), sqlExpression, bindingAsString);
-
-      log.error(message, e);
-
-      throw new FetchResultException(message, e);
-    }
-  }
-
-  protected List<T> mapList(ResultSet resultSet) {
-    return mapList(resultSet, null);
-  }
-
-  @SneakyThrows(SQLException.class)
-  protected @NonNull List<T> mapList(ResultSet resultSet, Integer chunk) {
-    List<T> result = new ArrayList<>();
-    while (resultSet.next()) {
-      result.add(mapItem(resultSet));
-
-      if (Objects.nonNull(chunk) && result.size() == chunk) {
-        return result;
-      }
-    }
-
-    return result;
-  }
-
-  abstract T mapItem(ResultSet resultSet) throws SQLException;
+  public abstract T mapItem(ResultSet resultSet);
 
   public Paginator<T> paginate(int page, int perPage) {
     try {
@@ -400,13 +332,12 @@ public abstract class Builder<T, B extends Builder<T, B>>
     return firstOrThrow(() -> new NoSuchElementException("No value present"));
   }
 
-  public Iterator<List<T>> chunk() {
+  public ChunkIterator<T, B> chunk() throws SQLException {
     return chunk(DEFAULT_CHUNK);
   }
 
-  public Iterator<List<T>> chunk(Integer chunk) {
-    return fetchResultSet(
-        resultSet -> new ResultSetChunkIterator<>(() -> mapList(resultSet, chunk)));
+  public ChunkIterator<T, B> chunk(int chunk) throws SQLException {
+    return new PlantChunkIterator<>(self(), chunk);
   }
 
   public SqlExpression getSqlExpression() {
@@ -485,5 +416,10 @@ public abstract class Builder<T, B extends Builder<T, B>>
 
   public boolean doesNotExists() {
     return !exists();
+  }
+
+  public B clone() {
+    // todo
+    return null;
   }
 }

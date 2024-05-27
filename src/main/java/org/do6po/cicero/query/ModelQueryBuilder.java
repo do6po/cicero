@@ -15,9 +15,12 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.SneakyThrows;
 import org.do6po.cicero.enums.OperatorEnum;
 import org.do6po.cicero.enums.PredicateOperatorEnum;
 import org.do6po.cicero.filter.ModelFilter;
+import org.do6po.cicero.iterator.ChunkIterator;
+import org.do6po.cicero.iterator.ModelChunkIterator;
 import org.do6po.cicero.model.BaseModel;
 import org.do6po.cicero.relation.Relation;
 import org.do6po.cicero.relation.RelationLoader;
@@ -54,8 +57,9 @@ public abstract class ModelQueryBuilder<
     from(model.getTable()).select("*");
   }
 
+  @SneakyThrows
   @Override
-  public M mapItem(ResultSet resultSet) throws SQLException {
+  public M mapItem(ResultSet resultSet) {
     M newInstance = getInstance(modelClass);
 
     newInstance.setAttributes(RowMapper.rowToMap(resultSet, newInstance.getTable()));
@@ -260,5 +264,10 @@ public abstract class ModelQueryBuilder<
 
   public <L extends List<M>> L get(Function<List<M>, L> function) {
     return function.apply(get());
+  }
+
+  @Override
+  public ChunkIterator<M, B> chunk(int chunk) throws SQLException {
+    return new ModelChunkIterator<>(self(), chunk);
   }
 }
