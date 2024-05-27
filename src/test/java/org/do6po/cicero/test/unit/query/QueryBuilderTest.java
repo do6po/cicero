@@ -4,55 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.do6po.cicero.query.QueryBuilder.query;
 import static org.do6po.cicero.utils.DotUtil.dot;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.List;
-import org.do6po.cicero.component.DbDriverResolverContainer;
-import org.do6po.cicero.configuration.DbDriver;
-import org.do6po.cicero.configuration.DbDriverResolver;
 import org.do6po.cicero.enums.DirectionEnum;
 import org.do6po.cicero.expression.SqlExpression;
 import org.do6po.cicero.expression.join.JoinExpression.JoinTypeEnum;
-import org.do6po.cicero.query.grammar.Grammar;
-import org.do6po.cicero.query.grammar.collector.PgsqlQueryCollector;
-import org.junit.jupiter.api.BeforeAll;
+import org.do6po.cicero.query.QueryBuilder;
 import org.junit.jupiter.api.Test;
 
-class QueryBuilderTest {
-  private static final DbDriverResolver resolver = mock(DbDriverResolver.class);
-  private static final DbDriver dbDriver = mock(DbDriver.class);
-  private static final Grammar grammar = mock(Grammar.class);
-  private static final PgsqlQueryCollector pgsqlQueryCollector = new PgsqlQueryCollector();
-
-  public static final String table1 = "table1";
-  public static final String table2 = "table2";
-  public static final String table3 = "table3";
-
-  public static final String column1 = "column1";
-  public static final String column2 = "column2";
-  public static final String column3 = "column3";
-
-  public static final String value1 = "Some text";
-  public static final Integer value2 = 100;
-  public static final Instant value3 = Instant.now();
-  public static final Integer limit1 = 59;
-  public static final int offset1 = 1001;
-
-  @BeforeAll
-  static void setUp() {
-    if (DbDriverResolverContainer.has()) {
-      return;
-    }
-
-    DbDriverResolverContainer.put(resolver);
-
-    when(resolver.get(anyString())).thenReturn(dbDriver);
-    when(dbDriver.getGrammar()).thenReturn(grammar);
-    when(grammar.getQueryCollector()).thenReturn(pgsqlQueryCollector);
-  }
+class QueryBuilderTest extends BaseQueryTest {
 
   @Test
   void from() {
@@ -313,5 +273,33 @@ class QueryBuilderTest {
         expression.getExpression());
 
     assertThat(expression.getBindings()).isEmpty();
+  }
+
+  @Test
+  void copy() {
+    QueryBuilder queryBuilder =
+        query(table1)
+            .select(column1, column2, column3)
+            .distinct()
+            .parallel()
+            .innerJoin(table2, column1, column2)
+            .where(column1, 100)
+            .groupBy(column3)
+            .orderBy(column1)
+            .limit(100)
+            .offset(1000);
+
+    QueryBuilder copy = queryBuilder.copy();
+
+    assertEquals(queryBuilder.isDistinct(), copy.isDistinct());
+    assertEquals(queryBuilder.isParallel(), copy.isParallel());
+    assertEquals(queryBuilder.getLimit(), copy.getLimit());
+    assertEquals(queryBuilder.getOffset(), copy.getOffset());
+
+    assertEquals(queryBuilder.getColumns(), copy.getColumns());
+    assertEquals(queryBuilder.getJoins(), copy.getJoins());
+    assertEquals(queryBuilder.getPredicates(), copy.getPredicates());
+    assertEquals(queryBuilder.getGroups(), copy.getGroups());
+    assertEquals(queryBuilder.getOrders(), copy.getOrders());
   }
 }

@@ -270,4 +270,13 @@ public abstract class ModelQueryBuilder<
   public ChunkIterator<M, B> chunk(int chunk) throws SQLException {
     return new ModelChunkIterator<>(self(), chunk);
   }
+
+  @Override
+  public B copy() {
+    B copy = super.copy();
+    copy.with = with;
+    copy.nullifyRelations = nullifyRelations;
+
+    return copy;
+  }
 }

@@ -68,8 +68,8 @@ public abstract class Builder<T, B extends Builder<T, B>>
   protected String connection = "default";
 
   @Getter protected boolean parallel = true;
-  @Getter protected List<SelectExpression> columns = new ArrayList<>();
   @Getter protected boolean distinct = false;
+  @Getter protected List<SelectExpression> columns = new ArrayList<>();
   @Getter protected List<FromExpression> from = new ArrayList<>();
   @Getter protected List<JoinExpression> joins = new ArrayList<>();
   @Getter protected List<PredicateExpression> predicates = new ArrayList<>();
@@ -77,11 +77,6 @@ public abstract class Builder<T, B extends Builder<T, B>>
   @Getter protected List<HavingExpression> having = new ArrayList<>();
   @Getter protected List<OrderExpression> orders = new ArrayList<>();
   @Getter protected List<UnionExpression> unions = new ArrayList<>();
-  protected List<String> aggregate = new ArrayList<>();
-  protected List<Object> groupLimit;
-  protected int unionLimit;
-  protected int unionOffset;
-  protected List<Object> unionOrders;
   @Getter protected Integer limit;
   @Getter protected Integer offset = 0;
 
@@ -89,6 +84,10 @@ public abstract class Builder<T, B extends Builder<T, B>>
     distinct = value;
 
     return self();
+  }
+
+  public B distinct() {
+    return distinct(true);
   }
 
   protected B getBuilderInstance() {
@@ -303,14 +302,10 @@ public abstract class Builder<T, B extends Builder<T, B>>
   }
 
   public Long getCountForPagination() {
-    B builder =
-        getBuilderInstance()
-            .from(from)
-            // join
-            .select("count(*) as %s".formatted(COUNT_ALIAS));
-
-    builder.distinct = distinct;
-    builder.predicates = new ArrayList<>(predicates);
+    B builder = copy().select("count(*) as %s".formatted(COUNT_ALIAS));
+    builder.orders = new ArrayList<>();
+    builder.limit = null;
+    builder.offset = 0;
     return builder.one().fetchResultSet(this::extractCountFromResultSet);
   }
 
@@ -418,8 +413,22 @@ public abstract class Builder<T, B extends Builder<T, B>>
     return !exists();
   }
 
-  public B clone() {
-    // todo
-    return null;
+  public B copy() {
+    B newInstance = getBuilderInstance();
+    newInstance.connection = connection;
+    newInstance.parallel = parallel;
+    newInstance.distinct = distinct;
+    newInstance.columns = new ArrayList<>(columns);
+    newInstance.from = new ArrayList<>(from);
+    newInstance.joins = new ArrayList<>(joins);
+    newInstance.predicates = new ArrayList<>(predicates);
+    newInstance.groups = new ArrayList<>(groups);
+    newInstance.having = new ArrayList<>(having);
+    newInstance.orders = new ArrayList<>(orders);
+    newInstance.unions = new ArrayList<>(unions);
+    newInstance.limit = limit;
+    newInstance.offset = offset;
+
+    return newInstance;
   }
 }

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.do6po.cicero.exception.BaseException;
-import org.do6po.cicero.exception.CiceroConnectionException;
+import org.do6po.cicero.exception.CiceroDbDriverException;
 import org.do6po.cicero.expression.Expression;
 import org.do6po.cicero.query.grammar.Grammar;
 
@@ -60,7 +60,7 @@ public interface DbDriver {
       return function.apply(connection);
     } catch (SQLException e) {
       String message = "Connection failed!";
-      throw new CiceroConnectionException(message, e);
+      throw new CiceroDbDriverException(message, e);
     }
   }
 }
