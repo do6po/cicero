@@ -9,7 +9,7 @@ public class ModelChunkIterator<M extends BaseModel<M, B>, B extends ModelQueryB
     extends PlantChunkIterator<M, B> {
 
   @SuppressWarnings("unchecked")
-  public ModelChunkIterator(ModelQueryBuilder<M, B> builder, Integer size) throws SQLException {
+  public ModelChunkIterator(ModelQueryBuilder<M, B> builder, int size) throws SQLException {
     super((B) builder, size);
   }
 

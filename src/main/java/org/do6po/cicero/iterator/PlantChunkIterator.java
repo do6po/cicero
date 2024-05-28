@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.do6po.cicero.configuration.DbDriver;
 import org.do6po.cicero.query.Builder;
 import org.do6po.cicero.utils.ResultSetUtil;
 
@@ -16,11 +17,14 @@ public class PlantChunkIterator<T, B extends Builder<T, B>> implements ChunkIter
   protected final Connection connection;
   protected final ResultSet resultSet;
 
-  public PlantChunkIterator(B builder, Integer size) throws SQLException {
+  public PlantChunkIterator(B builder, int size) throws SQLException {
     this.builder = builder;
     this.size = size;
-    this.connection = builder.getDbDriver().getConnection();
-    this.resultSet = ResultSetUtil.fetch(connection, builder.getSqlExpression());
+
+    DbDriver dbDriver = builder.getDbDriver();
+    this.connection = dbDriver.getConnection();
+    this.resultSet =
+        dbDriver.createCursor(connection, builder.getSqlExpression(), cs -> cs.setFetchSize(size));
   }
 
   @Override

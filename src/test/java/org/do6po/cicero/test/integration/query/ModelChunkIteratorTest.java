@@ -14,6 +14,7 @@ import org.do6po.cicero.test.integration.BaseDbTest;
 import org.do6po.cicero.test.integration.model.ProductM;
 import org.do6po.cicero.test.integration.model.ProductM_.Relations;
 import org.do6po.cicero.test.integration.model.builder.ProductQB;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 @SqlExecutorGetter(BaseDbTest.DEFAULT_SQL_EXECUTOR)

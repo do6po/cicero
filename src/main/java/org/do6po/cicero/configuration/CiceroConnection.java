@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.do6po.cicero.interceptor.CiceroConnectionDelegate;
 import org.do6po.cicero.interceptor.QueryCounter;
 import org.do6po.cicero.query.grammar.Grammar;
+import org.slf4j.Logger;
 
 @Slf4j
 @Getter
@@ -29,6 +30,11 @@ public class CiceroConnection implements DbDriver {
     this.dataSource = dataSource;
     this.grammar = GrammarFactory.get(driverClass);
     this.queryCounter = queryCounter;
+  }
+
+  @Override
+  public Logger logger() {
+    return log;
   }
 
   @Override

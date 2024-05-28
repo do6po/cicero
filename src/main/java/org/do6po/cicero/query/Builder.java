@@ -264,8 +264,8 @@ public abstract class Builder<T, B extends Builder<T, B>>
     return fetchResultSet(rs -> ResultSetUtil.mapList(rs, this::mapItem, null));
   }
 
-  public <R> R fetchResultSet(Function<ResultSet, R> function) {
-    return getDbDriver().execute(c -> ResultSetUtil.fetchAndMap(c, getSqlExpression(), function));
+  protected <R> R fetchResultSet(Function<ResultSet, R> function) {
+    return getDbDriver().executeFetch(getSqlExpression(), function);
   }
 
   public abstract T mapItem(ResultSet resultSet);

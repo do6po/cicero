@@ -274,7 +274,7 @@ public abstract class ModelQueryBuilder<
   @Override
   public B copy() {
     B copy = super.copy();
-    copy.with = with;
+    copy.with = new HashSet<>(with);
     copy.nullifyRelations = nullifyRelations;
 
     return copy;
