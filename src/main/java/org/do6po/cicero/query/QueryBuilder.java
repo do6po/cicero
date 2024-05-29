@@ -1,7 +1,6 @@
 package org.do6po.cicero.query;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Map;
 import org.do6po.cicero.utils.RowMapper;
 
@@ -20,7 +19,7 @@ public class QueryBuilder extends Builder<Map<String, Object>, QueryBuilder> {
   }
 
   @Override
-  public Map<String, Object> mapItem(ResultSet resultSet) throws SQLException {
+  public Map<String, Object> mapItem(ResultSet resultSet) {
     return RowMapper.rowToMap(resultSet);
   }
 }

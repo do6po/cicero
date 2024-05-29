@@ -2,20 +2,21 @@ package org.do6po.cicero.utils;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RowMapper {
 
-  public static Map<String, Object> rowToMap(ResultSet rs) throws SQLException {
+  public static Map<String, Object> rowToMap(ResultSet rs) {
     return rowToMap(rs, null);
   }
 
-  public static Map<String, Object> rowToMap(ResultSet rs, String table) throws SQLException {
+  @SneakyThrows
+  public static Map<String, Object> rowToMap(ResultSet rs, String table) {
     Map<String, Object> result = new LinkedHashMap<>();
 
     ResultSetMetaData metaData = rs.getMetaData();

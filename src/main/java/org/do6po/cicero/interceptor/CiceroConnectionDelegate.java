@@ -44,6 +44,8 @@ public class CiceroConnectionDelegate implements Connection {
 
   @Override
   public CallableStatement prepareCall(String s) throws SQLException {
+    queryCounter.tryIncrement();
+
     return delegate.prepareCall(s);
   }
 
