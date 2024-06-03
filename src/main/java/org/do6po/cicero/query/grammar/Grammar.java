@@ -12,8 +12,12 @@ public abstract class Grammar {
 
   public abstract QueryCollector getQueryCollector();
 
-  public WriteExpression compileInsert(Builder<?, ?> builder, Map<String, Object> value) {
+  public WriteExpression compileInsert(Builder<?, ?> builder, List<Map<String, Object>> values) {
     throw new BaseException("compileInsert is not implemented by given grammar");
+  }
+
+  public WriteExpression compileUpdate(Builder<?, ?> builder, Map<String, Object> value) {
+    throw new BaseException("compileUpdate is not implemented by given grammar");
   }
 
   protected String wrapTable(List<FromExpression> from) {

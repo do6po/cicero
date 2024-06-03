@@ -1,43 +1,46 @@
 package org.do6po.cicero.expression.write;
 
-import org.do6po.cicero.expression.Expression;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.do6po.cicero.expression.Expression;
 
-public interface WriteExpression extends Expression {
-  String getTable();
+public abstract class WriteExpression implements Expression {
+  abstract String getTable();
 
-  List<Map<String, Object>> getValues();
+  abstract List<Map<String, Object>> getValues();
 
-  default String getInsertStatement(String insertPattern) {
-    String columns = columnize(getValues().stream().findFirst().orElseThrow().keySet());
-    String parameters =
-        getValues().stream()
-            .map(p -> "(" + parametrize(p.values()) + ")")
-            .collect(Collectors.joining(", "));
-
-    return insertPattern.formatted(getTable(), columns, parameters);
+  protected String columnize() {
+    return String.join(", ", getColumns());
   }
 
-  default String columnize(Set<String> keySet) {
-    return String.join(", ", keySet);
+  protected Set<String> getColumns() {
+    return getValues().stream().findFirst().orElseThrow().keySet();
   }
 
-  default String parametrize(Collection<Object> parameters) {
-    return String.join(", ", parameters.stream().map(this::getParameterBind).toList());
+  protected String columnizeUpdate() {
+    return getColumns().stream().map("%s = ?"::formatted).collect(Collectors.joining(", "));
   }
 
-  default String getParameterBind(Object o) {
+  protected String parametrize() {
+    return getValues().stream()
+        .map(
+            p ->
+                "("
+                    + String.join(", ", p.values().stream().map(this::getParameterBind).toList())
+                    + ")")
+        .collect(Collectors.joining(", "));
+  }
+
+  protected String getParameterBind(Object o) {
     return "?";
   }
 
   @Override
-  default Collection<Object> getBindings() {
+  public Collection<Object> getBindings() {
     ArrayList<Object> result = new ArrayList<>();
 
     for (var value : getValues()) {
