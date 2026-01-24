@@ -24,6 +24,14 @@ public abstract class Grammar {
     throw new BaseException("compileDelete is not implemented by given grammar");
   }
 
+  public WriteExpression compileUpsert(
+      Builder<?, ?> builder,
+      List<Map<String, Object>> values,
+      List<String> conflictColumns,
+      List<String> updateColumns) {
+    throw new BaseException("compileUpsert is not implemented by given grammar");
+  }
+
   protected String wrapTable(List<FromExpression> from) {
     if (from.isEmpty()) {
       throw new BaseException("Table is not specified");
