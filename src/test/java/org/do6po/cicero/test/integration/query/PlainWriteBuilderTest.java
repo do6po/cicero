@@ -123,4 +123,170 @@ class PlainWriteBuilderTest extends BaseDbTest {
 
     assertTrue(userQuery().whereAre(toUpdate).exists());
   }
+
+  @Test
+  void delete_single_record() {
+    String id = randomUUID().toString();
+
+    LinkedHashMap<String, Object> attrs =
+        attrs()
+            .put("id", id)
+            .put("username", "User to Delete")
+            .put("created_at", Timestamp.from(Instant.now()))
+            .put("updated_at", Timestamp.from(Instant.now()))
+            .getAttributes();
+
+    // Insert the record first
+    PlainWriteBuilder.query("users").insert(attrs);
+    assertTrue(userQuery().whereAre(attrs).exists());
+
+    startQueryCount();
+
+    // Delete the record
+    int deleted = PlainWriteBuilder.query("users").where("id", id).delete();
+
+    assertQueryCount(1);
+    assertEquals(1, deleted);
+
+    // Verify record is gone
+    assertTrue(userQuery().where("id", id).doesNotExists());
+  }
+
+  @Test
+  void delete_multiple_records_with_where_in() {
+    String id1 = randomUUID().toString();
+    String id2 = randomUUID().toString();
+    String id3 = randomUUID().toString();
+
+    // Insert three records
+    PlainWriteBuilder.query("users")
+        .insert(
+            List.of(
+                attrs()
+                    .put("id", id1)
+                    .put("username", "User 1")
+                    .put("created_at", Timestamp.from(Instant.now()))
+                    .put("updated_at", Timestamp.from(Instant.now()))
+                    .getAttributes(),
+                attrs()
+                    .put("id", id2)
+                    .put("username", "User 2")
+                    .put("created_at", Timestamp.from(Instant.now()))
+                    .put("updated_at", Timestamp.from(Instant.now()))
+                    .getAttributes(),
+                attrs()
+                    .put("id", id3)
+                    .put("username", "User 3")
+                    .put("created_at", Timestamp.from(Instant.now()))
+                    .put("updated_at", Timestamp.from(Instant.now()))
+                    .getAttributes()));
+
+    // Verify all three exist
+    assertTrue(userQuery().where("id", id1).exists());
+    assertTrue(userQuery().where("id", id2).exists());
+    assertTrue(userQuery().where("id", id3).exists());
+
+    startQueryCount();
+
+    // Delete two of them using WHERE IN
+    int deleted =
+        PlainWriteBuilder.query("users")
+            .whereIn("id", java.util.List.of(id1, (Object) id2))
+            .delete();
+
+    assertQueryCount(1);
+    assertEquals(2, deleted);
+
+    // Verify two are gone, one remains
+    assertTrue(userQuery().where("id", id1).doesNotExists());
+    assertTrue(userQuery().where("id", id2).doesNotExists());
+    assertTrue(userQuery().where("id", id3).exists());
+  }
+
+  @Test
+  void delete_with_complex_where() {
+    String id1 = randomUUID().toString();
+    String id2 = randomUUID().toString();
+    String username = "ComplexDeleteUser";
+
+    // Insert two records with same username but different IDs
+    PlainWriteBuilder.query("users")
+        .insert(
+            List.of(
+                attrs()
+                    .put("id", id1)
+                    .put("username", username)
+                    .put("password", "password1")
+                    .put("created_at", Timestamp.from(Instant.now()))
+                    .put("updated_at", Timestamp.from(Instant.now()))
+                    .getAttributes(),
+                attrs()
+                    .put("id", id2)
+                    .put("username", username)
+                    .put("password", "password2")
+                    .put("created_at", Timestamp.from(Instant.now()))
+                    .put("updated_at", Timestamp.from(Instant.now()))
+                    .getAttributes()));
+
+    assertTrue(userQuery().where("id", id1).exists());
+    assertTrue(userQuery().where("id", id2).exists());
+
+    startQueryCount();
+
+    // Delete only the one with password1
+    int deleted =
+        PlainWriteBuilder.query("users")
+            .where("username", username)
+            .where("password", "password1")
+            .delete();
+
+    assertQueryCount(1);
+    assertEquals(1, deleted);
+
+    // Verify only one is deleted
+    assertTrue(userQuery().where("id", id1).doesNotExists());
+    assertTrue(userQuery().where("id", id2).exists());
+  }
+
+  @Test
+  void delete_with_is_null() {
+    String id = randomUUID().toString();
+
+    LinkedHashMap<String, Object> attrs =
+        attrs()
+            .put("id", id)
+            .put("username", "UserWithNullPassword")
+            .put("created_at", Timestamp.from(Instant.now()))
+            .put("updated_at", Timestamp.from(Instant.now()))
+            .getAttributes();
+
+    PlainWriteBuilder.query("users").insert(attrs);
+    assertTrue(userQuery().where("id", id).exists());
+
+    startQueryCount();
+
+    // Delete where password is NULL
+    int deleted = PlainWriteBuilder.query("users").where("id", id).isNull("password").delete();
+
+    assertQueryCount(1);
+    assertEquals(1, deleted);
+    assertTrue(userQuery().where("id", id).doesNotExists());
+  }
+
+  @Test
+  void delete_no_where_deletes_nothing_when_no_match() {
+    // Get initial count
+    long initialCount = userQuery().getCountForPagination();
+
+    startQueryCount();
+
+    // Delete with impossible condition
+    int deleted = PlainWriteBuilder.query("users").where("id", "impossible-id-999").delete();
+
+    assertQueryCount(1);
+    assertEquals(0, deleted);
+
+    // Verify count hasn't changed
+    assertEquals(initialCount, userQuery().getCountForPagination());
+  }
 }

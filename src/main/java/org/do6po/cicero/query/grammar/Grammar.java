@@ -20,6 +20,10 @@ public abstract class Grammar {
     throw new BaseException("compileUpdate is not implemented by given grammar");
   }
 
+  public WriteExpression compileDelete(Builder<?, ?> builder) {
+    throw new BaseException("compileDelete is not implemented by given grammar");
+  }
+
   protected String wrapTable(List<FromExpression> from) {
     if (from.isEmpty()) {
       throw new BaseException("Table is not specified");

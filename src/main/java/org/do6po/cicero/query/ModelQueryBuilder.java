@@ -271,6 +271,37 @@ public abstract class ModelQueryBuilder<
     return new ModelChunkIterator<>(self(), chunk);
   }
 
+  /**
+   * Deletes records from the database that match the current query conditions.
+   *
+   * <p>This method removes records from the database table associated with this model. Only records
+   * that match the WHERE conditions applied to this builder will be deleted.
+   *
+   * <p><strong>WARNING:</strong> If no WHERE conditions are specified, this will delete ALL records
+   * from the table.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * // Delete specific records by primary key
+   * int deleted = UserQB.query()
+   *     .whereKey("user-123")
+   *     .delete();
+   *
+   * // Delete records matching conditions
+   * int deleted = UserQB.query()
+   *     .where("status", "inactive")
+   *     .where("created_at", "&lt;", someDate)
+   *     .delete();
+   * </pre>
+   *
+   * @return the number of records deleted
+   * @see WriteBuilder#delete()
+   */
+  public int delete() {
+    return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileDelete(this));
+  }
+
   @Override
   public B copy() {
     B copy = super.copy();
