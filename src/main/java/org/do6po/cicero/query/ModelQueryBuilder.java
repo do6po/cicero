@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -300,6 +301,106 @@ public abstract class ModelQueryBuilder<
    */
   public int delete() {
     return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileDelete(this));
+  }
+
+  /**
+   * Inserts a record or updates it if it already exists (UPSERT operation).
+   *
+   * <p>Uses the model's primary key as the conflict column by default. When a conflict occurs on
+   * the primary key, the specified columns will be updated.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * Map&lt;String, Object&gt; values = Map.of(
+   *     "id", "user-123",
+   *     "username", "john",
+   *     "email", "john@example.com"
+   * );
+   *
+   * // Update username and email if user with this id already exists
+   * int affected = UserQB.query().upsert(values, List.of("username", "email"));
+   * </pre>
+   *
+   * @param value a map containing column names as keys and their values
+   * @param updateColumns columns to update when a conflict occurs on the primary key
+   * @return the number of rows inserted or updated
+   */
+  public int upsert(Map<String, Object> value, List<String> updateColumns) {
+    return upsert(List.of(value), List.of(model.getPrimaryKey()), updateColumns);
+  }
+
+  /**
+   * Inserts records or updates them if they already exist (batch UPSERT operation).
+   *
+   * <p>Uses the model's primary key as the conflict column by default.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * List&lt;Map&lt;String, Object&gt;&gt; users = List.of(
+   *     Map.of("id", "user-1", "username", "john", "email", "john@example.com"),
+   *     Map.of("id", "user-2", "username", "jane", "email", "jane@example.com")
+   * );
+   *
+   * int affected = UserQB.query().upsert(users, List.of("username", "email"));
+   * </pre>
+   *
+   * @param values a list of maps, each containing column names and values
+   * @param updateColumns columns to update when a conflict occurs on the primary key
+   * @return the number of rows inserted or updated
+   */
+  public int upsert(List<Map<String, Object>> values, List<String> updateColumns) {
+    return upsert(values, List.of(model.getPrimaryKey()), updateColumns);
+  }
+
+  /**
+   * Inserts a record or updates it if it already exists with custom conflict columns.
+   *
+   * <p>Allows specifying custom conflict columns instead of using the primary key.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * Map&lt;String, Object&gt; values = Map.of(
+   *     "email", "john@example.com",
+   *     "username", "john",
+   *     "status", "active"
+   * );
+   *
+   * // Update on email conflict (unique constraint)
+   * int affected = UserQB.query().upsert(
+   *     values,
+   *     List.of("email"),              // conflict on email
+   *     List.of("username", "status")  // update these columns
+   * );
+   * </pre>
+   *
+   * @param value a map containing column names as keys and their values
+   * @param conflictColumns columns that define the conflict target
+   * @param updateColumns columns to update when a conflict occurs
+   * @return the number of rows inserted or updated
+   */
+  public int upsert(
+      Map<String, Object> value, List<String> conflictColumns, List<String> updateColumns) {
+    return upsert(List.of(value), conflictColumns, updateColumns);
+  }
+
+  /**
+   * Inserts records or updates them if they already exist with custom conflict columns.
+   *
+   * <p>Batch version that allows specifying custom conflict columns.
+   *
+   * @param values a list of maps, each containing column names and values
+   * @param conflictColumns columns that define the conflict target
+   * @param updateColumns columns to update when a conflict occurs
+   * @return the number of rows inserted or updated
+   */
+  public int upsert(
+      List<Map<String, Object>> values, List<String> conflictColumns, List<String> updateColumns) {
+    return getDbDriver()
+        .executeWriteQuery(
+            d -> d.getGrammar().compileUpsert(this, values, conflictColumns, updateColumns));
   }
 
   @Override

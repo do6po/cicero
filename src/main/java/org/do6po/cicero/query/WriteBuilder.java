@@ -103,4 +103,73 @@ public abstract class WriteBuilder<T, B extends WriteBuilder<T, B>> extends Buil
   public int delete() {
     return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileDelete(this));
   }
+
+  /**
+   * Inserts records or updates them if they already exist (UPSERT operation).
+   *
+   * <p>Uses PostgreSQL's ON CONFLICT clause to handle conflicts. When a conflict occurs on the
+   * specified columns, the record will be updated instead of causing an error.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * Map&lt;String, Object&gt; values = Map.of(
+   *     "id", 1,
+   *     "username", "john",
+   *     "email", "john@example.com"
+   * );
+   *
+   * // Update username and email if id already exists
+   * int affected = builder.upsert(
+   *     values,
+   *     List.of("id"),                    // conflict column (primary key)
+   *     List.of("username", "email")      // columns to update on conflict
+   * );
+   * </pre>
+   *
+   * @param value a map containing column names as keys and their values
+   * @param conflictColumns columns that define the conflict target (e.g., primary key or unique
+   *     constraint)
+   * @param updateColumns columns to update when a conflict occurs; if empty or null, DO NOTHING is
+   *     used
+   * @return the number of rows inserted or updated
+   */
+  public int upsert(
+      Map<String, Object> value, List<String> conflictColumns, List<String> updateColumns) {
+    return upsert(List.of(value), conflictColumns, updateColumns);
+  }
+
+  /**
+   * Inserts multiple records or updates them if they already exist (batch UPSERT operation).
+   *
+   * <p>More efficient than calling {@link #upsert(Map, List, List)} multiple times as it executes
+   * a single batch UPSERT statement.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * List&lt;Map&lt;String, Object&gt;&gt; records = List.of(
+   *     Map.of("id", 1, "username", "john", "email", "john@example.com"),
+   *     Map.of("id", 2, "username", "jane", "email", "jane@example.com")
+   * );
+   *
+   * int affected = builder.upsert(
+   *     records,
+   *     List.of("id"),
+   *     List.of("username", "email")
+   * );
+   * </pre>
+   *
+   * @param values a list of maps, each containing column names and values
+   * @param conflictColumns columns that define the conflict target
+   * @param updateColumns columns to update when a conflict occurs; if empty or null, DO NOTHING is
+   *     used
+   * @return the number of rows inserted or updated
+   */
+  public int upsert(
+      List<Map<String, Object>> values, List<String> conflictColumns, List<String> updateColumns) {
+    return getDbDriver()
+        .executeWriteQuery(
+            d -> d.getGrammar().compileUpsert(this, values, conflictColumns, updateColumns));
+  }
 }

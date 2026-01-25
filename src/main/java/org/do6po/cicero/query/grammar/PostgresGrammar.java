@@ -6,6 +6,7 @@ import lombok.Getter;
 import org.do6po.cicero.expression.write.PostgresDeleteExpression;
 import org.do6po.cicero.expression.write.PostgresInsertExpression;
 import org.do6po.cicero.expression.write.PostgresUpdateExpression;
+import org.do6po.cicero.expression.write.PostgresUpsertExpression;
 import org.do6po.cicero.expression.write.WriteExpression;
 import org.do6po.cicero.query.Builder;
 import org.do6po.cicero.query.grammar.collector.PgsqlQueryCollector;
@@ -36,5 +37,16 @@ public class PostgresGrammar extends Grammar {
   public WriteExpression compileDelete(Builder<?, ?> builder) {
     return new PostgresDeleteExpression(
         wrapTable(builder.getFrom()), builder.getPredicateExpression());
+  }
+
+  @Override
+  public WriteExpression compileUpsert(
+      Builder<?, ?> builder,
+      List<Map<String, Object>> values,
+      List<String> conflictColumns,
+      List<String> updateColumns) {
+    String table = wrapTable(builder.getFrom());
+
+    return new PostgresUpsertExpression(table, values, conflictColumns, updateColumns);
   }
 }
