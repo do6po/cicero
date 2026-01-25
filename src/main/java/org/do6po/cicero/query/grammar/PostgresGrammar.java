@@ -3,6 +3,7 @@ package org.do6po.cicero.query.grammar;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import org.do6po.cicero.expression.write.PostgresDeleteExpression;
 import org.do6po.cicero.expression.write.PostgresInsertExpression;
 import org.do6po.cicero.expression.write.PostgresUpdateExpression;
 import org.do6po.cicero.expression.write.WriteExpression;
@@ -29,5 +30,11 @@ public class PostgresGrammar extends Grammar {
   public WriteExpression compileUpdate(Builder<?, ?> builder, Map<String, Object> value) {
     return new PostgresUpdateExpression(
         wrapTable(builder.getFrom()), List.of(value), builder.getPredicateExpression());
+  }
+
+  @Override
+  public WriteExpression compileDelete(Builder<?, ?> builder) {
+    return new PostgresDeleteExpression(
+        wrapTable(builder.getFrom()), builder.getPredicateExpression());
   }
 }
