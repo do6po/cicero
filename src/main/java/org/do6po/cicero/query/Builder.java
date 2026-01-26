@@ -335,6 +335,61 @@ public abstract class Builder<T, B extends Builder<T, B>>
     return new PlantChunkIterator<>(self(), chunk);
   }
 
+  /**
+   * Processes query results in chunks using a consumer callback.
+   *
+   * <p>This is a convenience method that automatically manages the ChunkIterator lifecycle and
+   * processes each chunk through the provided consumer. This approach is more idiomatic in Java
+   * compared to manual iterator management.
+   *
+   * <p>Example:
+   *
+   * <pre>
+   * userQuery().chunk(100, users -> {
+   *     users.forEach(user -> {
+   *         // Process each user
+   *     });
+   * });
+   * </pre>
+   *
+   * @param chunkSize the size of each chunk
+   * @param consumer the consumer to process each chunk
+   * @throws SQLException if a database error occurs
+   */
+  public void chunk(int chunkSize, Consumer<List<T>> consumer) throws SQLException {
+    try (ChunkIterator<T, B> iterator = chunk(chunkSize)) {
+      while (iterator.hasNext()) {
+        consumer.accept(iterator.next());
+      }
+    } catch (SQLException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException("Error processing chunks", e);
+    }
+  }
+
+  /**
+   * Processes query results in chunks using default chunk size with a consumer callback.
+   *
+   * <p>This is a convenience method that uses the default chunk size.
+   *
+   * <p>Example:
+   *
+   * <pre>
+   * userQuery().chunk(users -> {
+   *     users.forEach(user -> {
+   *         // Process each user
+   *     });
+   * });
+   * </pre>
+   *
+   * @param consumer the consumer to process each chunk
+   * @throws SQLException if a database error occurs
+   */
+  public void chunk(Consumer<List<T>> consumer) throws SQLException {
+    chunk(DEFAULT_CHUNK, consumer);
+  }
+
   public SqlExpression getSqlExpression() {
     return getDbDriver().getGrammar().getQueryCollector().collectExpression(self());
   }
