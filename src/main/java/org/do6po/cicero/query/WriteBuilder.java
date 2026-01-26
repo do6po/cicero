@@ -172,4 +172,36 @@ public abstract class WriteBuilder<T, B extends WriteBuilder<T, B>> extends Buil
         .executeWriteQuery(
             d -> d.getGrammar().compileUpsert(this, values, conflictColumns, updateColumns));
   }
+
+  /**
+   * Truncates the table by removing all records.
+   *
+   * <p>The TRUNCATE operation is much faster than DELETE for removing all records because it does
+   * not scan the table or generate individual row delete operations. However, it has some important
+   * characteristics:
+   *
+   * <ul>
+   *   <li>Resets auto-increment counters to their initial value
+   *   <li>Cannot be rolled back in some database configurations
+   *   <li>Does not fire DELETE triggers
+   *   <li>Requires elevated privileges (typically table owner or superuser)
+   * </ul>
+   *
+   * <p><strong>WARNING:</strong> This operation removes ALL data from the table. Use with extreme
+   * caution, especially in production environments.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * // Remove all records from the users table
+   * int affected = PlainWriteBuilder.query()
+   *     .from("temp_users")
+   *     .truncate();
+   * </pre>
+   *
+   * @return always returns 0 (truncate does not return affected row count)
+   */
+  public int truncate() {
+    return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileTruncate(this));
+  }
 }

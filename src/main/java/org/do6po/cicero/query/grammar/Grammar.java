@@ -3,6 +3,7 @@ package org.do6po.cicero.query.grammar;
 import java.util.List;
 import java.util.Map;
 import org.do6po.cicero.exception.BaseException;
+import org.do6po.cicero.expression.Expression;
 import org.do6po.cicero.expression.from.FromExpression;
 import org.do6po.cicero.expression.write.WriteExpression;
 import org.do6po.cicero.query.Builder;
@@ -30,6 +31,10 @@ public abstract class Grammar {
       List<String> conflictColumns,
       List<String> updateColumns) {
     throw new BaseException("compileUpsert is not implemented by given grammar");
+  }
+
+  public Expression compileTruncate(Builder<?, ?> builder) {
+    throw new BaseException("compileTruncate is not implemented by given grammar");
   }
 
   protected String wrapTable(List<FromExpression> from) {

@@ -403,6 +403,37 @@ public abstract class ModelQueryBuilder<
             d -> d.getGrammar().compileUpsert(this, values, conflictColumns, updateColumns));
   }
 
+  /**
+   * Truncates the table associated with this model by removing all records.
+   *
+   * <p>This is a convenience method that calls the underlying {@code truncate()} implementation from
+   * the WriteBuilder. It removes all data from the model's table quickly without scanning individual
+   * rows.
+   *
+   * <p><strong>WARNING:</strong> This operation:
+   *
+   * <ul>
+   *   <li>Removes ALL records from the table
+   *   <li>Resets auto-increment counters
+   *   <li>Cannot be rolled back in some configurations
+   *   <li>Does not fire model events or triggers
+   * </ul>
+   *
+   * <p>Use with extreme caution in production environments.
+   *
+   * <p>Example usage:
+   *
+   * <pre>
+   * // Remove all users from the database
+   * UserQB.query().truncate();
+   * </pre>
+   *
+   * @return always returns 0 (truncate does not return affected row count)
+   */
+  public int truncate() {
+    return getDbDriver().executeWriteQuery(d -> d.getGrammar().compileTruncate(this));
+  }
+
   @Override
   public B copy() {
     B copy = super.copy();

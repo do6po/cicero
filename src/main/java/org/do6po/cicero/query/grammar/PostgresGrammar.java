@@ -3,8 +3,10 @@ package org.do6po.cicero.query.grammar;
 import java.util.List;
 import java.util.Map;
 import lombok.Getter;
+import org.do6po.cicero.expression.Expression;
 import org.do6po.cicero.expression.write.PostgresDeleteExpression;
 import org.do6po.cicero.expression.write.PostgresInsertExpression;
+import org.do6po.cicero.expression.write.PostgresTruncateExpression;
 import org.do6po.cicero.expression.write.PostgresUpdateExpression;
 import org.do6po.cicero.expression.write.PostgresUpsertExpression;
 import org.do6po.cicero.expression.write.WriteExpression;
@@ -48,5 +50,10 @@ public class PostgresGrammar extends Grammar {
     String table = wrapTable(builder.getFrom());
 
     return new PostgresUpsertExpression(table, values, conflictColumns, updateColumns);
+  }
+
+  @Override
+  public Expression compileTruncate(Builder<?, ?> builder) {
+    return new PostgresTruncateExpression(wrapTable(builder.getFrom()));
   }
 }
